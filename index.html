@@ -1,0 +1,2480 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="description" content="成人急診與住院低血鈉 (Hyponatremia) 5 步驟快速分類診斷、急症 3% NaCl Bolus 方案、泡製換算、Adrogué-Madias 點滴速率與過度矯正 D5W+DDAVP 救援計算機。">
+<title>低血鈉 (Hyponatremia) 快速診斷與 3% NaCl 治療換算｜ED Tools</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2316395b'/%3E%3Ctext x='16' y='22' font-size='15' font-weight='700' text-anchor='middle' fill='%2338bdf8' font-family='sans-serif'%3ENa%3C/text%3E%3C/svg%3E">
+<style>
+  :root {
+    --navy: #16395b;
+    --navy2: #1e4d77;
+    --navy-light: #f0f5fa;
+    --teal: #0e7490;
+    --teal-dark: #0b5c73;
+    --teal-l: #e0f2fe;
+    --ink: #172033;
+    --body: #334155;
+    --muted: #64748b;
+    --line: #cbd5e1;
+    --line-light: #e2e8f0;
+    --bg: #f4f7fa;
+    --paper: #ffffff;
+    --green: #15803d;
+    --green-bg: #eafaf1;
+    --green-bd: #86efac;
+    --amber: #b45309;
+    --amber-bg: #fffbeb;
+    --amber-bd: #fde68a;
+    --red: #b91c1c;
+    --red-bg: #fef2f2;
+    --red-bd: #fca5a5;
+    --purple: #6b21a8;
+    --purple-bg: #f3e8ff;
+    --shadow-sm: 0 1px 3px rgba(22, 57, 91, 0.06);
+    --shadow: 0 4px 16px rgba(22, 57, 91, 0.08);
+  }
+
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", "Segoe UI", sans-serif;
+    line-height: 1.55;
+    font-size: 16px;
+    padding-bottom: 92px;
+  }
+
+  /* 防止 iOS 自動縮放 */
+  input, select, textarea, button {
+    font: inherit;
+    font-size: max(16px, 1rem);
+    touch-action: manipulation;
+  }
+
+  a { color: var(--teal-dark); }
+
+  /* 頂部頁首 */
+  header.hero {
+    background: linear-gradient(135deg, var(--navy), var(--navy2));
+    color: #fff;
+    padding: 18px 16px 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.14);
+  }
+  .hero-inner {
+    max-width: 1080px;
+    margin: 0 auto;
+  }
+  .hero-top {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .back-link {
+    color: #bae6fd;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    min-height: 38px;
+  }
+  .back-link:hover { color: #fff; text-decoration: underline; }
+  .hero-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .badge-pill {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #e0f2fe;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
+  header.hero h1 {
+    margin: 0 0 6px;
+    font-size: clamp(1.35rem, 4vw, 1.75rem);
+    font-weight: 750;
+    line-height: 1.3;
+  }
+  header.hero .sub {
+    margin: 0;
+    color: #d8e9f6;
+    font-size: 0.9rem;
+  }
+
+  .wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 14px 14px 36px;
+  }
+
+  /* 黏性步驟導覽與範例快速列 */
+  .sticky-nav {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: rgba(244, 247, 250, 0.96);
+    backdrop-filter: blur(6px);
+    padding: 8px 0;
+    margin-bottom: 12px;
+    border-bottom: 1px solid var(--line-light);
+  }
+  .nav-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .step-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .step-jump {
+    text-decoration: none;
+    background: var(--paper);
+    color: var(--navy);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    transition: 0.15s;
+  }
+  .step-jump:hover {
+    border-color: var(--teal);
+    background: var(--teal-l);
+  }
+  .preset-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-sm {
+    border: 1px solid var(--line);
+    background: var(--paper);
+    color: var(--body);
+    border-radius: 7px;
+    padding: 5px 10px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    min-height: 34px;
+  }
+  .btn-sm:hover {
+    border-color: var(--teal);
+    color: var(--navy);
+    background: #f0f9ff;
+  }
+  .btn-clear {
+    border-color: var(--red-bd);
+    color: var(--red);
+    background: #fff5f5;
+    font-weight: 700;
+  }
+  .btn-clear:hover {
+    background: var(--red-bg);
+    border-color: var(--red);
+  }
+
+  /* 卡片與區塊 */
+  .step-card {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 13px;
+    padding: 18px 18px 20px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-sm);
+    scroll-margin-top: 66px;
+  }
+  .step-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--navy-light);
+  }
+  .step-title-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .step-num {
+    background: var(--navy);
+    color: #fff;
+    font-weight: 800;
+    font-size: 0.82rem;
+    padding: 4px 10px;
+    border-radius: 7px;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+  }
+  .step-card h2 {
+    margin: 0;
+    font-size: 1.15rem;
+    color: var(--navy);
+    font-weight: 750;
+  }
+  .step-badge {
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--navy-light);
+    color: var(--navy);
+  }
+
+  /* 表單網格 */
+  .grid-4 {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 10px;
+  }
+  .field label, .field-label {
+    font-weight: 700;
+    font-size: 0.88rem;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+  }
+  .field label small, .field-label small {
+    font-weight: 500;
+    color: var(--muted);
+    font-size: 0.76rem;
+  }
+  .input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .input-wrap input, .field select {
+    width: 100%;
+    min-height: 44px;
+    border: 1.5px solid var(--line);
+    border-radius: 9px;
+    padding: 8px 64px 8px 11px;
+    color: var(--ink);
+    background: #fff;
+    font-weight: 600;
+  }
+  .field select {
+    padding-right: 12px;
+  }
+  .input-wrap input:focus, .field select:focus {
+    outline: 3px solid rgba(14, 116, 144, 0.18);
+    border-color: var(--teal);
+  }
+  .unit {
+    position: absolute;
+    right: 10px;
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-weight: 600;
+    pointer-events: none;
+  }
+  .hint {
+    font-size: 0.76rem;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+
+  /* 單選分段與多選按鈕卡 */
+  .segmented {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 8px;
+  }
+  .seg-item {
+    position: relative;
+  }
+  .seg-item input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .seg-item span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    padding: 8px 10px;
+    border: 1.5px solid var(--line);
+    border-radius: 9px;
+    background: #fff;
+    color: var(--body);
+    font-weight: 700;
+    font-size: 0.86rem;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.15s;
+  }
+  .seg-item input:checked + span {
+    border-color: var(--teal);
+    background: var(--teal-l);
+    color: var(--navy);
+    box-shadow: 0 0 0 2px rgba(14, 116, 144, 0.12);
+  }
+  .seg-item.danger input:checked + span {
+    border-color: var(--red);
+    background: var(--red-bg);
+    color: var(--red);
+  }
+  .seg-item.warn input:checked + span {
+    border-color: var(--amber);
+    background: var(--amber-bg);
+    color: var(--amber);
+  }
+
+  /* 勾選標籤群 */
+  .check-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .check-pill {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 8px 11px;
+    border: 1.5px solid var(--line-light);
+    border-radius: 9px;
+    background: #f8fafc;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--body);
+    transition: 0.15s;
+  }
+  .check-pill:hover {
+    border-color: var(--teal);
+    background: #fff;
+  }
+  .check-pill input {
+    margin-top: 2px;
+    width: 18px;
+    height: 18px;
+    accent-color: var(--teal);
+    flex: none;
+  }
+  .check-pill.severe-pill:has(input:checked) {
+    border-color: var(--red);
+    background: var(--red-bg);
+    color: var(--red);
+  }
+  .check-pill.mod-pill:has(input:checked) {
+    border-color: var(--amber);
+    background: var(--amber-bg);
+    color: var(--amber);
+  }
+  .check-pill.ods-pill:has(input:checked) {
+    border-color: var(--purple);
+    background: var(--purple-bg);
+    color: var(--purple);
+  }
+
+  /* 動態警示盒與結果面板 */
+  .alert-box {
+    border-radius: 11px;
+    padding: 14px 16px;
+    margin-top: 12px;
+    border: 1.5px solid var(--line);
+    background: #f8fafc;
+  }
+  .alert-box.red {
+    background: var(--red-bg);
+    border-color: var(--red-bd);
+    color: #7f1d1d;
+  }
+  .alert-box.amber {
+    background: var(--amber-bg);
+    border-color: var(--amber-bd);
+    color: #78350f;
+  }
+  .alert-box.green {
+    background: var(--green-bg);
+    border-color: var(--green-bd);
+    color: #14532d;
+  }
+  .alert-box.teal {
+    background: #f0f9ff;
+    border-color: #7dd3fc;
+    color: var(--navy);
+  }
+  .alert-title {
+    font-weight: 800;
+    font-size: 1rem;
+    margin: 0 0 6px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  /* 指標小卡 KPI */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .kpi-card {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px 12px;
+  }
+  .kpi-card .kpi-label {
+    font-size: 0.76rem;
+    color: var(--muted);
+    font-weight: 700;
+  }
+  .kpi-card .kpi-val {
+    font-size: 1.18rem;
+    font-weight: 800;
+    color: var(--navy);
+    margin-top: 2px;
+    font-variant-numeric: tabular-nums;
+  }
+  .kpi-card .kpi-sub {
+    font-size: 0.74rem;
+    color: var(--body);
+    margin-top: 2px;
+  }
+
+  /* 互動式動態高亮流程圖 */
+  .flowchart-wrap {
+    margin-top: 14px;
+    padding: 14px;
+    background: #f8fafc;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+  }
+  .flow-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .flow-tier {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 8px;
+  }
+  .flow-node {
+    padding: 10px 12px;
+    border-radius: 9px;
+    border: 1.5px solid var(--line);
+    background: #fff;
+    font-size: 0.82rem;
+    color: var(--body);
+    transition: 0.2s;
+  }
+  .flow-node strong {
+    display: block;
+    color: var(--navy);
+    font-size: 0.86rem;
+    margin-bottom: 2px;
+  }
+  .flow-node.active {
+    border-color: var(--teal);
+    border-width: 2.5px;
+    background: var(--teal-l);
+    box-shadow: 0 2px 10px rgba(14, 116, 144, 0.18);
+  }
+  .flow-node.active-danger {
+    border-color: var(--red);
+    border-width: 2.5px;
+    background: var(--red-bg);
+  }
+  .flow-arrow {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+
+  /* 分類卡片（支援單一或並列候選） */
+  .cat-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 12px;
+    margin-top: 12px;
+  }
+  .cat-detail-card {
+    border: 2px solid var(--teal);
+    border-radius: 12px;
+    background: #fff;
+    padding: 14px 16px;
+  }
+  .cat-detail-card.secondary {
+    border-color: var(--line);
+    border-style: dashed;
+  }
+  .cat-detail-card h3 {
+    margin: 0 0 6px;
+    color: var(--navy);
+    font-size: 1.04rem;
+  }
+  .cat-section-title {
+    font-weight: 750;
+    font-size: 0.83rem;
+    color: var(--teal-dark);
+    margin: 10px 0 4px;
+    text-transform: uppercase;
+  }
+  .cat-list {
+    margin: 0;
+    padding-left: 1.2rem;
+    font-size: 0.86rem;
+    color: var(--body);
+  }
+  .cat-list li {
+    margin-bottom: 3px;
+  }
+
+  /* 表格 */
+  .table-scroll {
+    overflow-x: auto;
+    margin-top: 10px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #fff;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 580px;
+    font-size: 0.85rem;
+  }
+  th, td {
+    padding: 9px 10px;
+    text-align: left;
+    border-bottom: 1px solid var(--line-light);
+    vertical-align: middle;
+  }
+  th {
+    background: var(--navy-light);
+    color: var(--navy);
+    font-weight: 750;
+    font-size: 0.78rem;
+  }
+  tr.selected-row {
+    background: var(--teal-l);
+    font-weight: 700;
+  }
+  tr.danger-row {
+    background: #fff1f2;
+  }
+
+  /* 摺疊區與原始圖片畫廊 */
+  details {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    margin-top: 12px;
+    overflow: hidden;
+  }
+  summary {
+    cursor: pointer;
+    padding: 11px 14px;
+    font-weight: 750;
+    color: var(--navy);
+    font-size: 0.9rem;
+    background: #f8fafc;
+  }
+  summary:hover { background: var(--navy-light); }
+  .details-body {
+    padding: 14px;
+    font-size: 0.86rem;
+    color: var(--body);
+  }
+
+  .fig-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 12px;
+    margin-top: 8px;
+  }
+  .fig-card {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px;
+    background: #fff;
+    text-align: center;
+  }
+  .fig-card img {
+    width: 100%;
+    height: 180px;
+    object-fit: contain;
+    background: #f8fafc;
+    border-radius: 6px;
+    cursor: zoom-in;
+    border: 1px solid var(--line-light);
+  }
+  .fig-caption {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--navy);
+    margin-top: 6px;
+  }
+
+  /* Lightbox 放大檢視 */
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: rgba(15, 23, 42, 0.88);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  .lightbox img {
+    max-width: 96vw;
+    max-height: 82vh;
+    object-fit: contain;
+    background: #fff;
+    border-radius: 8px;
+    padding: 6px;
+  }
+  .lightbox-bar {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #fff;
+    font-size: 0.9rem;
+  }
+  .lightbox-close {
+    background: var(--teal);
+    color: #fff;
+    border: 0;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  /* 底部常駐操作列 */
+  .bottom-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 30;
+    background: rgba(255, 255, 255, 0.97);
+    border-top: 1.5px solid var(--line);
+    box-shadow: 0 -4px 14px rgba(22, 57, 91, 0.08);
+    padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+  }
+  .bottom-inner {
+    max-width: 1080px;
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .live-status {
+    font-size: 0.84rem;
+    color: var(--body);
+    font-weight: 600;
+    flex: 1 1 240px;
+  }
+  .bottom-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .btn-primary {
+    background: var(--teal);
+    color: #fff;
+    border: 0;
+    border-radius: 9px;
+    padding: 9px 16px;
+    font-weight: 750;
+    font-size: 0.9rem;
+    cursor: pointer;
+    min-height: 42px;
+  }
+  .btn-primary:hover { background: var(--teal-dark); }
+
+  .disc {
+    margin-top: 18px;
+    padding: 14px 16px;
+    font-size: 0.8rem;
+    color: var(--muted);
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 11px;
+  }
+
+  @media (max-width: 820px) {
+    .grid-4, .grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 540px) {
+    .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
+    .step-card { padding: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <div class="hero-top">
+      <a class="back-link" id="back-home-link" href="https://er.kiwi-ai.uk/">← 回急診臨床小工具首頁 (er.kiwi-ai.uk)</a>
+      <div class="hero-badges">
+        <span class="badge-pill">成人急診／住院適用 (Adult ED/Inpatient)</span>
+        <span class="badge-pill">無痕運算・不存病患個資</span>
+      </div>
+    </div>
+    <h1>低血鈉 (Hyponatremia) 快速分類診斷與 3% NaCl 治療換算</h1>
+    <p class="sub">5 步驟床邊決策：急症 3% NaCl Bolus 方案・24h 安全配額追蹤・滲透壓與有效張力・尿液 6 大分類・泡製與 Adrogué-Madias 速率・D5W+DDAVP 過度矯正救援</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <!-- 黏性導覽與情境預設 -->
+  <nav class="sticky-nav" aria-label="步驟快速跳轉與範例載入">
+    <div class="nav-row">
+      <div class="step-links">
+        <a class="step-jump" href="#step1">Step 1 急症與上限</a>
+        <a class="step-jump" href="#step2">Step 2 滲透壓/張力</a>
+        <a class="step-jump" href="#step34">Step 3–4 尿液與 6 分類</a>
+        <a class="step-jump" href="#step5">Step 5 泡製/速率/救援</a>
+        <a class="step-jump" href="#refs">流程圖與文獻</a>
+      </div>
+      <div class="preset-bar">
+        <button type="button" class="btn-sm" data-preset="severe_seizure">範例：嚴重抽搐 (Na 110)</button>
+        <button type="button" class="btn-sm" data-preset="siadh_desal">範例：SIADH 高張尿</button>
+        <button type="button" class="btn-sm" data-preset="azotemia_trap">範例：高 BUN 陷阱</button>
+        <button type="button" class="btn-sm" data-preset="hypovol_vomit">範例：嘔吐低血容</button>
+        <button type="button" class="btn-sm btn-clear" id="btn-clear-top">清除重填</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ==================== STEP 1 ==================== -->
+  <section class="step-card" id="step1">
+    <div class="step-header">
+      <div class="step-title-group">
+        <span class="step-num">STEP 1</span>
+        <h2>急症分流、基本體液參數與 24h/48h 安全矯正目標</h2>
+      </div>
+      <span class="step-badge" id="step1-badge">先判別是否需立即 3% NaCl Bolus</span>
+    </div>
+
+    <div class="grid-4">
+      <div class="field">
+        <label for="serum-na">實測血鈉 (Serum Na) <small>mEq/L = mmol/L</small></label>
+        <div class="input-wrap">
+          <input id="serum-na" type="number" min="80" max="160" step="0.1" inputmode="decimal" placeholder="如 116" autocomplete="off">
+          <span class="unit">mEq/L</span>
+        </div>
+        <span class="hint">&lt; 135 為低血鈉；≤ 105 屬極重度高 ODS 風險</span>
+      </div>
+
+      <div class="field">
+        <label for="weight-kg">體重 (Weight) <small>計算 TBW 與 Bolus</small></label>
+        <div class="input-wrap">
+          <input id="weight-kg" type="number" min="25" max="250" step="0.5" inputmode="decimal" placeholder="如 60" autocomplete="off">
+          <span class="unit">kg</span>
+        </div>
+        <span class="hint">成人體重；未填時仍可先看急症處置指引</span>
+      </div>
+
+      <div class="field">
+        <label for="sex">生理性別與年齡</label>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+          <select id="sex" aria-label="生理性別">
+            <option value="male">男性 (Male)</option>
+            <option value="female">女性 (Female)</option>
+          </select>
+          <div class="input-wrap">
+            <input id="age-years" type="number" min="18" max="115" step="1" inputmode="numeric" value="55" placeholder="年齡" autocomplete="off">
+            <span class="unit">歲</span>
+          </div>
+        </div>
+        <span class="hint">≥ 65 歲自動調整 MDCalc #480 TBW 係數</span>
+      </div>
+
+      <div class="field">
+        <label for="height-cm">身高 (Height) <small>選填，供 Watson TBW</small></label>
+        <div class="input-wrap">
+          <input id="height-cm" type="number" min="100" max="230" step="1" inputmode="decimal" placeholder="選填 (cm)" autocomplete="off">
+          <span class="unit">cm</span>
+        </div>
+        <span class="hint" id="tbw-live-hint">預設採 MDCalc #480 體重係數法</span>
+      </div>
+    </div>
+
+    <!-- 症狀分級（拆開嚴重 vs 中度嚴重） -->
+    <div class="field" style="margin-top: 6px;">
+      <span class="field-label">
+        <span>1A. 神經學症狀嚴重度分級（請確認症狀可由低血鈉解釋，並同步檢查 ABCs、GCS、指尖血糖）</span>
+      </span>
+      <div class="segmented" role="radiogroup" aria-label="症狀嚴重度">
+        <label class="seg-item danger">
+          <input type="radio" name="symptom-severity" value="severe">
+          <span>🚨 嚴重症狀 (Severe)<br><small>抽搐・昏迷・意識遲鈍・呼吸抑制</small></span>
+        </label>
+        <label class="seg-item warn">
+          <input type="radio" name="symptom-severity" value="moderate">
+          <span>⚠️ 中度嚴重症狀 (Moderately Severe)<br><small>噁心伴嘔吐・混亂 (Confusion)・步態不穩</small></span>
+        </label>
+        <label class="seg-item">
+          <input type="radio" name="symptom-severity" value="mild_none" checked>
+          <span>🟢 無或輕微非特異症狀 (Mild / None)<br><small>無急性腦水腫表現</small></span>
+        </label>
+      </div>
+
+      <div class="check-grid" style="margin-top: 8px;">
+        <label class="check-pill severe-pill"><input type="checkbox" class="sym-severe-cb" value="抽搐 (Seizure)"><span>抽搐 (Seizure) [嚴重]</span></label>
+        <label class="check-pill severe-pill"><input type="checkbox" class="sym-severe-cb" value="昏迷／深度嗜睡 (Coma / Stupor)"><span>昏迷／深度嗜睡 (Coma) [嚴重]</span></label>
+        <label class="check-pill severe-pill"><input type="checkbox" class="sym-severe-cb" value="意識遲鈍 (Obtundation)"><span>意識遲鈍 (Obtundation) [嚴重]</span></label>
+        <label class="check-pill severe-pill"><input type="checkbox" class="sym-severe-cb" value="呼吸抑制／心肺窘迫"><span>呼吸抑制／腦疝脫徵象 [嚴重]</span></label>
+        <label class="check-pill mod-pill"><input type="checkbox" class="sym-mod-cb" value="混亂 (Confusion)"><span>混亂 (Confusion) [中度嚴重]</span></label>
+        <label class="check-pill mod-pill"><input type="checkbox" class="sym-mod-cb" value="噁心伴嘔吐 (Vomiting)"><span>噁心伴嘔吐 (Vomiting) [中度嚴重]</span></label>
+        <label class="check-pill mod-pill"><input type="checkbox" class="sym-mod-cb" value="步態不穩／跌倒 (Ataxia)"><span>步態不穩 (Ataxia) [中度嚴重]</span></label>
+      </div>
+    </div>
+
+    <!-- 具名急症 Bolus 方案選擇與發作時間 -->
+    <div class="grid-3" style="margin-top: 10px;">
+      <div class="field">
+        <label for="bolus-regimen">1B. 具名 3% NaCl 急症 Bolus 方案</label>
+        <select id="bolus-regimen">
+          <option value="ese_2014">歐洲指引方案 (ESE 2014)：150 mL over 20 min</option>
+          <option value="us_2013">美國共識方案 (US 2013 / AAFP)：100 mL over 10 min (最多3次)</option>
+          <option value="salsa_2021">SALSA Trial 方案 (2021)：2 mL/kg over 20 min</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="onset-time">發作時間 (Onset Duration)</label>
+        <select id="onset-time">
+          <option value="chronic_or_unknown" selected>慢性 (≥ 48 小時) 或發作時間不明（預設安全模式）</option>
+          <option value="acute_lt_48h">明確急性發作 (&lt; 48 小時，如術後／急性大量飲水)</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="limit-guideline">慢性安全上限基準</label>
+        <select id="limit-guideline">
+          <option value="us_cjasn" selected>US 2013 / CJASN 2024 (一般目標 6–8/上限 10；高風險目標 4–6/上限 8)</option>
+          <option value="ese_2014">ESE 2014 歐洲指引 (首 24h 上限 10 mmol/L、其後每 24h 上限 8)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- 即時急症 3% NaCl Bolus 輸出面板 (選取嚴重或中度嚴重時立即顯示，不需等其他欄位) -->
+    <div id="step1-emergency-panel" class="alert-box red" hidden></div>
+
+    <!-- 1C. ODS 風險因子（區分主要確診因子 vs 次要修飾因子）與 24h 累計矯正追蹤 -->
+    <div class="field" style="margin-top: 12px;">
+      <span class="field-label">
+        <span>1C. 滲透壓去髓鞘症候群 (ODS) 風險因子檢核（主要風險因子將啟動目標 4–6、絕對上限 ≤ 8 mEq/L/24h）</span>
+      </span>
+      <div class="check-grid">
+        <label class="check-pill ods-pill"><input type="checkbox" id="ods-na105"><span><b>[主要]</b> Serum Na ≤ 105 mEq/L (輸入 ≤105 自動勾選)</span></label>
+        <label class="check-pill ods-pill"><input type="checkbox" id="ods-hypok"><span><b>[主要]</b> 合併低血鉀 (K &lt; 3.5；注意補鉀亦等滲升鈉！)</span></label>
+        <label class="check-pill ods-pill"><input type="checkbox" id="ods-alcohol"><span><b>[主要]</b> 慢性酒精使用疾患 (Alcoholism)</span></label>
+        <label class="check-pill ods-pill"><input type="checkbox" id="ods-malnutrition"><span><b>[主要]</b> 營養不良／惡病質 (Malnutrition)</span></label>
+        <label class="check-pill ods-pill"><input type="checkbox" id="ods-liver"><span><b>[主要]</b> 晚期肝病／肝硬化 (Advanced liver disease)</span></label>
+        <label class="check-pill"><input type="checkbox" id="ods-sec-thiazide"><span>[次要留意] 老年女性／Thiazide 使用（易快速水利尿）</span></label>
+        <label class="check-pill"><input type="checkbox" id="ods-sec-polydipsia"><span>[次要留意] 低溶質攝取／多飲症（給溶質後極易暴衝過矯）</span></label>
+      </div>
+    </div>
+
+    <div class="grid-4" style="margin-top: 10px; background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid var(--line-light);">
+      <div class="field" style="margin-bottom:0;">
+        <label for="serum-k">實測血鉀 (Serum K) <small>選填</small></label>
+        <div class="input-wrap">
+          <input id="serum-k" type="number" min="1.0" max="10.0" step="0.1" inputmode="decimal" placeholder="如 3.2" autocomplete="off">
+          <span class="unit">mEq/L</span>
+        </div>
+        <span class="hint">&lt; 3.5 自動納入主要 ODS 風險</span>
+      </div>
+
+      <div class="field" style="margin-bottom:0;">
+        <label for="initial-na-24h">24h 內起始血鈉 <small>選填，算已升幅度</small></label>
+        <div class="input-wrap">
+          <input id="initial-na-24h" type="number" min="80" max="160" step="0.1" inputmode="decimal" placeholder="如 112" autocomplete="off">
+          <span class="unit">mEq/L</span>
+        </div>
+        <span class="hint">若已治療一段時間，填寫初始 Na</span>
+      </div>
+
+      <div class="field" style="margin-bottom:0;">
+        <label for="prior-rise-24h">或直接填 24h 已升幅度 <small>含先前 Bolus</small></label>
+        <div class="input-wrap">
+          <input id="prior-rise-24h" type="number" min="0" max="40" step="0.1" inputmode="decimal" placeholder="預設 0" autocomplete="off">
+          <span class="unit">mEq/L</span>
+        </div>
+        <span class="hint">不可於午夜歸零重算</span>
+      </div>
+
+      <div class="field" style="margin-bottom:0;">
+        <label for="elapsed-hours-24h">本 24h 已治療時數 <small>選填</small></label>
+        <div class="input-wrap">
+          <input id="elapsed-hours-24h" type="number" min="0" max="23.5" step="0.5" inputmode="decimal" placeholder="如 4" autocomplete="off">
+          <span class="unit">小時</span>
+        </div>
+        <label style="margin-top:4px; font-size:0.78rem; font-weight:600; justify-content:flex-start; gap:6px; cursor:pointer;">
+          <input type="checkbox" id="include-bolus-quota" checked> 將本波急症 Bolus 計入已用配額
+        </label>
+      </div>
+    </div>
+
+    <!-- Step 1 矯正目標與剩餘配額輸出 -->
+    <div id="step1-limits-panel" class="alert-box teal"></div>
+  </section>
+
+  <!-- ==================== STEP 2 ==================== -->
+  <section class="step-card" id="step2">
+    <div class="step-header">
+      <div class="step-title-group">
+        <span class="step-num">STEP 2</span>
+        <h2>確認真性低張性低血鈉：血清滲透壓、有效張力與滲透壓間隙</h2>
+      </div>
+      <span class="step-badge" id="step2-badge">區分總滲透壓 vs 有效張力 (Tonicity)</span>
+    </div>
+
+    <div class="grid-4">
+      <div class="field">
+        <label for="measured-osm">實測血清滲透壓 <small>Measured Serum Osm</small></label>
+        <div class="input-wrap">
+          <input id="measured-osm" type="number" min="150" max="450" step="1" inputmode="decimal" placeholder="如 245" autocomplete="off">
+          <span class="unit">mOsm/kg</span>
+        </div>
+        <span class="hint">&lt; 280 低張｜280–285 等張｜&gt; 285 需排除高 BUN/乙醇</span>
+      </div>
+
+      <div class="field">
+        <label for="glucose-mgdl">血糖 (Glucose) <small>計算張力與校正 Na</small></label>
+        <div class="input-wrap">
+          <input id="glucose-mgdl" type="number" min="10" max="2000" step="1" inputmode="decimal" placeholder="如 100" autocomplete="off">
+          <span class="unit">mg/dL</span>
+        </div>
+        <span class="hint">同步算 Katz (+1.6) 與 Hillier (+2.4)</span>
+      </div>
+
+      <div class="field">
+        <label for="bun-mgdl">血尿素氮 (BUN) <small>無效滲透壓物質</small></label>
+        <div class="input-wrap">
+          <input id="bun-mgdl" type="number" min="1" max="300" step="0.5" inputmode="decimal" placeholder="如 14" autocomplete="off">
+          <span class="unit">mg/dL</span>
+        </div>
+        <span class="hint">BUN 升高會墊高總滲透壓但不增加有效張力</span>
+      </div>
+
+      <div class="field">
+        <label for="ethanol-mgdl">血中乙醇 (Ethanol) <small>選填</small></label>
+        <div class="input-wrap">
+          <input id="ethanol-mgdl" type="number" min="0" max="800" step="1" inputmode="decimal" placeholder="選填 (0)" autocomplete="off">
+          <span class="unit">mg/dL</span>
+        </div>
+        <span class="hint">乙醇 ÷ 4.6 計入滲透壓（屬無效滲透壓物質）</span>
+      </div>
+    </div>
+
+    <div class="field" style="max-width: 460px;">
+      <label for="ise-method">檢驗室血鈉測定法 (ISE Method) <small>假性低血鈉判讀用</small></label>
+      <select id="ise-method">
+        <option value="indirect" selected>中央檢驗室傳統 Indirect ISE（稀釋法，受高血脂／高蛋白影響）</option>
+        <option value="direct">血氣分析儀 ABG/VBG Direct ISE（直接不稀釋法，反映真實血水相 Na）</option>
+      </select>
+    </div>
+
+    <div class="kpi-row" id="step2-kpis"></div>
+    <div id="step2-result-panel" class="alert-box teal"></div>
+  </section>
+
+  <!-- ==================== STEP 3 & STEP 4 ==================== -->
+  <section class="step-card" id="step34">
+    <div class="step-header">
+      <div class="step-title-group">
+        <span class="step-num">STEP 3 &amp; 4</span>
+        <h2>尿液滲透壓、尿鈉／尿鉀、生理干擾校正與 6 大鑑別診斷分類</h2>
+      </div>
+      <span class="step-badge" id="step34-badge">建議於補液／利尿劑前採檢尿液</span>
+    </div>
+
+    <div class="grid-4">
+      <div class="field">
+        <label for="urine-osm">尿液滲透壓 (Urine Osm) <small>ADH 活性指標</small></label>
+        <div class="input-wrap">
+          <input id="urine-osm" type="number" min="20" max="1500" step="1" inputmode="decimal" placeholder="如 420" autocomplete="off">
+          <span class="unit">mOsm/kg</span>
+        </div>
+        <span class="hint">≤ 100 極度稀釋 (低 ADH)；&gt; 100 具 ADH 活性</span>
+      </div>
+
+      <div class="field">
+        <label for="urine-na">尿鈉 (Urine Na) <small>RAAS 保鈉指標</small></label>
+        <div class="input-wrap">
+          <input id="urine-na" type="number" min="1" max="300" step="1" inputmode="decimal" placeholder="如 55" autocomplete="off">
+          <span class="unit">mEq/L</span>
+        </div>
+        <span class="hint">20–30 mEq/L 為臨床灰區，支援切點切換</span>
+      </div>
+
+      <div class="field">
+        <label for="urine-k">尿鉀 (Urine K) <small>算 Fürst Ratio 與脫鹽風險</small></label>
+        <div class="input-wrap">
+          <input id="urine-k" type="number" min="1" max="300" step="1" inputmode="decimal" placeholder="如 40 (選填)" autocomplete="off">
+          <span class="unit">mEq/L</span>
+        </div>
+        <span class="hint">當 U_Na + U_K &gt; 154，0.9% NaCl 會脫鹽惡化！</span>
+      </div>
+
+      <div class="field">
+        <label for="una-cutoff-mode">Urine Na 判讀切點</label>
+        <select id="una-cutoff-mode">
+          <option value="30" selected>歐洲指引切點 (ESE 2014)：≤ 30 vs &gt; 30 mEq/L</option>
+          <option value="20">傳統美國切點 (US Classic)：≤ 20 vs &gt; 20 mEq/L</option>
+        </select>
+        <span class="hint">介於 20–30 時系統會自動提示灰區雙向考量</span>
+      </div>
+    </div>
+
+    <!-- 臨床體液狀態 (ECF Volume) -->
+    <div class="field" style="margin-top: 6px;">
+      <span class="field-label">臨床細胞外液狀態 (Clinical ECF Volume Status) <small>若理學檢查不確定，請選「不確定 (Equivocal)」並列比較候選診斷</small></span>
+      <div class="segmented" role="radiogroup" aria-label="臨床體液狀態">
+        <label class="seg-item">
+          <input type="radio" name="volume-status" value="hypovolemic">
+          <span>🏜️ 低血容 (Hypovolemic)<br><small>姿位性低血壓・心搏過速・黏膜乾</small></span>
+        </label>
+        <label class="seg-item">
+          <input type="radio" name="volume-status" value="euvolemic">
+          <span>⚖️ 正常血容 (Euvolemic)<br><small>無水腫亦無明顯脫水徵象</small></span>
+        </label>
+        <label class="seg-item">
+          <input type="radio" name="volume-status" value="hypervolemic">
+          <span>🌊 高血容 (Hypervolemic)<br><small>雙下肢水腫・腹水・頸靜脈怒張・肺囉音</small></span>
+        </label>
+        <label class="seg-item">
+          <input type="radio" name="volume-status" value="equivocal" checked>
+          <span>❓ 體液不確定 (Equivocal)<br><small>臨床常見！並列比較低血容 vs SIADH</small></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- 尿液判讀干擾因子勾選 -->
+    <div class="field" style="margin-top: 8px;">
+      <span class="field-label">尿液指標干擾因子檢核（勾選後自動提示校正指標如 FE_Urea、FE_UA、Urine Cl）</span>
+      <div class="check-grid">
+        <label class="check-pill"><input type="checkbox" id="conf-diuretics"><span>💊 近期使用利尿劑 (Thiazides / Loop)</span></label>
+        <label class="check-pill"><input type="checkbox" id="conf-vomiting"><span>🤮 頻繁嘔吐／鼻胃管引流 (鹼中毒排 HCO₃⁻)</span></label>
+        <label class="check-pill"><input type="checkbox" id="conf-saline"><span>💧 採檢前已輸注 0.9% NaCl／含鈉點滴</span></label>
+        <label class="check-pill"><input type="checkbox" id="conf-nonconcurrent"><span>⏱️ 血液與尿液非同期採檢</span></label>
+      </div>
+    </div>
+
+    <!-- 選填進階尿液指標：FE_Urea, FE_UA, S_UA, U_Cl -->
+    <details id="fe-details">
+      <summary>🔬 展開進階輔助指標計算：FE_Urea（利尿劑干擾校正）、FE_Uric Acid、血清尿酸 (S_UA)、尿氯 (U_Cl)</summary>
+      <div class="details-body">
+        <div class="grid-4">
+          <div class="field">
+            <label for="serum-cr">血清肌酸酐 (Serum Cr)</label>
+            <div class="input-wrap">
+              <input id="serum-cr" type="number" min="0.1" max="30" step="0.05" inputmode="decimal" placeholder="如 1.0" autocomplete="off">
+              <span class="unit">mg/dL</span>
+            </div>
+          </div>
+          <div class="field">
+            <label for="urine-cr">尿液肌酸酐 (Urine Cr)</label>
+            <div class="input-wrap">
+              <input id="urine-cr" type="number" min="1" max="1000" step="0.5" inputmode="decimal" placeholder="如 50" autocomplete="off">
+              <span class="unit">mg/dL</span>
+            </div>
+          </div>
+          <div class="field">
+            <label for="urea-unit-mode">血／尿尿素單位模式</label>
+            <select id="urea-unit-mode">
+              <option value="same_nitrogen" selected>血 BUN + 尿 UUN (皆以尿素氮 mg/dL 計)</option>
+              <option value="bun_and_urine_urea">血 BUN (mg/dL) + 尿 Urea (mg/dL，自動 ÷2.14 轉 UUN)</option>
+              <option value="same_urea">血 Urea + 尿 Urea (皆以尿素 mg/dL 計)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="urine-urea">尿液尿素氮 UUN / Urea</label>
+            <div class="input-wrap">
+              <input id="urine-urea" type="number" min="1" max="5000" step="1" inputmode="decimal" placeholder="依左側單位" autocomplete="off">
+              <span class="unit">mg/dL</span>
+            </div>
+            <span class="hint">血 BUN 自動由 Step 2 帶入（或於下方確認）</span>
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <div class="field">
+            <label for="serum-ua">血清尿酸 (Serum Uric Acid)</label>
+            <div class="input-wrap">
+              <input id="serum-ua" type="number" min="0.5" max="25" step="0.1" inputmode="decimal" placeholder="如 3.2 (&lt;4 支持 SIADH)" autocomplete="off">
+              <span class="unit">mg/dL</span>
+            </div>
+          </div>
+          <div class="field">
+            <label for="urine-ua">尿液尿酸 (Urine Uric Acid)</label>
+            <div class="input-wrap">
+              <input id="urine-ua" type="number" min="1" max="500" step="1" inputmode="decimal" placeholder="如 45 (算 FE_UA)" autocomplete="off">
+              <span class="unit">mg/dL</span>
+            </div>
+          </div>
+          <div class="field">
+            <label for="urine-cl">尿氯 (Urine Chloride, U_Cl)</label>
+            <div class="input-wrap">
+              <input id="urine-cl" type="number" min="1" max="300" step="1" inputmode="decimal" placeholder="嘔吐時 &lt;20 支持低血容" autocomplete="off">
+              <span class="unit">mEq/L</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <!-- 尿液 KPI 與 Desalination / 干擾警示 -->
+    <div class="kpi-row" id="step34-kpis"></div>
+    <div id="step34-warnings"></div>
+
+    <!-- 互動式即時高亮演算法流程圖 -->
+    <div class="flowchart-wrap" aria-label="互動式低血鈉診斷演算法流程圖">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
+        <strong style="color:var(--navy); font-size:0.92rem;">🗺️ 動態高亮臨床決策流程圖（隨上方輸入數值即時點亮當前路徑）</strong>
+        <a href="#refs" style="font-size:0.8rem; font-weight:700;">查看下方 3 張原始指引流程圖 (點擊放大) ↓</a>
+      </div>
+      <div class="flow-grid">
+        <div class="flow-tier">
+          <div class="flow-node" id="fnode-triage">
+            <strong>Step 1：急症症狀評估</strong>
+            嚴重／中度嚴重神經學症狀 → 立即 3% NaCl Bolus (目標先升 4–6 mEq/L)
+          </div>
+          <div class="flow-node" id="fnode-tonicity">
+            <strong>Step 2：血清滲透壓與有效張力</strong>
+            排除高血糖轉移與假性低血鈉；注意高 BUN／乙醇仍屬真性低張 (&lt; 280)
+          </div>
+        </div>
+        <div class="flow-arrow">↓ 確認真性低張性低血鈉 (True Hypotonic Hyponatremia) → 檢視 Urine Osmolality</div>
+        <div class="flow-tier">
+          <div class="flow-node" id="fnode-uosm-low">
+            <strong>Urine Osm ≤ 100 mOsm/kg</strong>
+            尿液適當極度稀釋（ADH 受抑制）<br>→ <b>Category 4</b>：原發性多飲、低溶質攝取、Beer potomania
+          </div>
+          <div class="flow-node" id="fnode-uosm-high">
+            <strong>Urine Osm &gt; 100 mOsm/kg</strong>
+            尿液未達最大稀釋（反映 ADH 活性存在）<br>→ 進一步比較 Urine Na 與體液狀態 (ECF Volume)
+          </div>
+        </div>
+        <div class="flow-arrow">↓ 當 Urine Osm &gt; 100 mOsm/kg 時，依 Urine Na (≤ 20–30 vs &gt; 20–30) 與體液容積分為以下 5 類</div>
+        <div class="flow-tier">
+          <div class="flow-node" id="fnode-cat1">
+            <strong>Cat 1：低血容 ＋ 低尿鈉</strong>
+            GI 腹瀉流失、第三空間、遠期利尿劑 → 0.9% NaCl 補液（小心水利尿過矯！）
+          </div>
+          <div class="flow-node" id="fnode-cat2">
+            <strong>Cat 2：低血容 ＋ 高尿鈉</strong>
+            Thiazides/利尿劑、腎上腺不全、嘔吐 HCO₃⁻ 尿 (低 U_Cl)、CSW → 停藥/補液/類固醇
+          </div>
+          <div class="flow-node" id="fnode-cat3">
+            <strong>Cat 3：正常血容 ＋ ADH 活性</strong>
+            SIADH (須先排除腎上腺/甲狀腺/腎病)、藥物 → 限水、Urea、避免 0.9% NaCl 脫鹽
+          </div>
+          <div class="flow-node" id="fnode-cat5">
+            <strong>Cat 5：高血容 ＋ 低尿鈉</strong>
+            心衰竭、肝硬化、腎病症候群 → 限水限鹽 ＋ Loop 利尿劑
+          </div>
+          <div class="flow-node" id="fnode-cat6">
+            <strong>Cat 6：高血容 ＋ 高尿鈉</strong>
+            AKI / 晚期 CKD / ESRD（或高血容給利尿劑後）→ 限水、利尿或透析
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4 六大分類診斷與治療建議卡片輸出 -->
+    <div id="step4-category-output"></div>
+  </section>
+
+  <!-- ==================== STEP 5 ==================== -->
+  <section class="step-card" id="step5">
+    <div class="step-header">
+      <div class="step-title-group">
+        <span class="step-num">STEP 5</span>
+        <h2>3% NaCl 床邊泡製換算、Adrogué-Madias 點滴速率計算機與過度矯正救援</h2>
+      </div>
+      <span class="step-badge">MDCalc #480 擴充版 ＋ 雙模式泡製回代 ＋ D5W/DDAVP</span>
+    </div>
+
+    <!-- 5A. 3% NaCl 床邊泡製換算器（雙模式） -->
+    <div style="background:#f8fafc; border:1.5px solid var(--line); border-radius:12px; padding:15px; margin-bottom:16px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
+        <h3 style="margin:0; font-size:1.03rem; color:var(--navy);">🧪 5A. 3% NaCl 高張鹽水床邊泡製換算器（以 0.9% NaCl ＋ 10% NaCl 20 mL/amp 調配）</h3>
+        <button type="button" class="btn-sm" id="btn-reset-mix">重設為標準 6 支快泡法 (3.00%)</button>
+      </div>
+
+      <div class="segmented" style="margin-bottom: 12px;">
+        <label class="seg-item">
+          <input type="radio" name="mix-mode" value="mode_a_ampoules" checked>
+          <span>模式 A：整支安瓿快泡法（推薦：500 mL 抽 100 mL ＋ 加 6 支 ＝ 520 mL 之 3.00% NaCl）</span>
+        </label>
+        <label class="seg-item">
+          <input type="radio" name="mix-mode" value="mode_b_isovolumetric">
+          <span>模式 B：等體積精準抽換法（維持總量 500 mL 不變，需抽換 115.4 mL）</span>
+        </label>
+      </div>
+
+      <div class="grid-4" id="mix-mode-a-inputs">
+        <div class="field" style="margin-bottom:0;">
+          <label for="mix-base-pct">基底點滴袋種類</label>
+          <select id="mix-base-pct">
+            <option value="0.9" selected>0.9% NaCl (Normal Saline)</option>
+            <option value="0.45">0.45% NaCl (Half Saline)</option>
+            <option value="0">Sterile Water / D5W (0% NaCl)</option>
+          </select>
+        </div>
+        <div class="field" style="margin-bottom:0;">
+          <label for="mix-bag-vol">基底點滴袋容量</label>
+          <div class="input-wrap">
+            <input id="mix-bag-vol" type="number" min="100" max="2000" step="50" value="500" inputmode="decimal">
+            <span class="unit">mL</span>
+          </div>
+        </div>
+        <div class="field" style="margin-bottom:0;">
+          <label for="mix-withdraw-ml">先抽出丟棄體積</label>
+          <div class="input-wrap">
+            <input id="mix-withdraw-ml" type="number" min="0" max="900" step="10" value="100" inputmode="decimal">
+            <span class="unit">mL</span>
+          </div>
+        </div>
+        <div class="field" style="margin-bottom:0;">
+          <label for="mix-amp-count">加入 10% NaCl (20 mL/支) 支數</label>
+          <div class="input-wrap">
+            <input id="mix-amp-count" type="number" min="1" max="25" step="0.5" value="6" inputmode="decimal">
+            <span class="unit">支 (20mL)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-3" id="mix-mode-b-inputs" hidden>
+        <div class="field" style="margin-bottom:0;">
+          <label for="mix-b-base-pct">基底點滴袋種類</label>
+          <select id="mix-b-base-pct">
+            <option value="0.9" selected>0.9% NaCl (Normal Saline)</option>
+            <option value="0.45">0.45% NaCl (Half Saline)</option>
+            <option value="0">Sterile Water / D5W (0% NaCl)</option>
+          </select>
+        </div>
+        <div class="field" style="margin-bottom:0;">
+          <label for="mix-b-bag-vol">維持固定最終總體積</label>
+          <div class="input-wrap">
+            <input id="mix-b-bag-vol" type="number" min="100" max="2000" step="50" value="500" inputmode="decimal">
+            <span class="unit">mL</span>
+          </div>
+        </div>
+        <div class="field" style="margin-bottom:0;">
+          <label for="mix-b-target-pct">目標調配濃度 (%)</label>
+          <div class="input-wrap">
+            <input id="mix-b-target-pct" type="number" min="1.0" max="8.0" step="0.1" value="3.0" inputmode="decimal">
+            <span class="unit">% NaCl</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="mix-result-box" class="alert-box teal" style="margin-top:10px;"></div>
+    </div>
+
+    <!-- 5B. MDCalc #480 (Adrogué-Madias) 輸液速率計算機 -->
+    <div style="background:#fff; border:1.5px solid var(--line); border-radius:12px; padding:15px; margin-bottom:16px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
+        <h3 style="margin:0; font-size:1.03rem; color:var(--navy);">💧 5B. 點滴輸注速率計算機 (Adrogué-Madias Formula / MDCalc #480 擴充版)</h3>
+        <button type="button" class="btn-sm" id="btn-sync-quota">帶入 Step 1 剩餘 24h 建議目標升幅</button>
+      </div>
+
+      <div class="grid-4">
+        <div class="field">
+          <label for="tbw-method">總體液量 (TBW) 估算公式</label>
+          <select id="tbw-method">
+            <option value="fraction" selected>MDCalc #480 體重係數法 (男0.6/0.5；女0.5/0.45)</option>
+            <option value="watson">Watson (1980) 身高體重經驗公式 (本工具擴充)</option>
+          </select>
+          <span class="hint">MDCalc #480 原版不含身高；填身高可切換 Watson 對照</span>
+        </div>
+
+        <div class="field">
+          <label for="infusate-select">選擇預計輸注點滴 (Infusate)</label>
+          <select id="infusate-select">
+            <option value="hypertonic_3" selected>3% NaCl (513.3 mEq/L)</option>
+            <option value="custom_mix">床邊自訂泡製液 (自動同步 5A 實際濃度)</option>
+            <option value="hypertonic_5">5% NaCl (855.6 mEq/L)</option>
+            <option value="hypertonic_2">2% NaCl (342.2 mEq/L；MDCalc 標 341)</option>
+            <option value="ns_09">0.9% NaCl (154 mEq/L)</option>
+            <option value="lr_134">Lactated Ringer's (134 mEq/L：Na 130 + 內含 K 4)</option>
+            <option value="lr_130">Lactated Ringer's (僅計 Na 130 mEq/L)</option>
+            <option value="half_ns_045">0.45% NaCl (77 mEq/L)</option>
+            <option value="quarter_ns_02">0.2% NaCl (34.2 mEq/L)</option>
+            <option value="d5w">5% Dextrose in Water (D5W, 0 mEq/L)</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="added-k-meql">點滴額外添加 KCl <small>選填</small></label>
+          <div class="input-wrap">
+            <input id="added-k-meql" type="number" min="0" max="100" step="1" value="0" inputmode="decimal">
+            <span class="unit">mEq/L</span>
+          </div>
+          <span class="hint">每公升點滴外加之 K⁺ 同樣會等滲提升血鈉！</span>
+        </div>
+
+        <div class="field">
+          <label for="target-delta-na">目標血鈉變化量與時間</label>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+            <div class="input-wrap">
+              <input id="target-delta-na" type="number" min="-20" max="20" step="0.5" value="5" inputmode="decimal" aria-label="目標血鈉變化量">
+              <span class="unit">mEq/L</span>
+            </div>
+            <div class="input-wrap">
+              <input id="infusion-hours" type="number" min="1" max="72" step="1" value="24" inputmode="decimal" aria-label="預計輸注小時數">
+              <span class="unit">hr</span>
+            </div>
+          </div>
+          <span class="hint">正值為升鈉，負值為降鈉</span>
+        </div>
+      </div>
+
+      <div id="infusion-result-box" class="alert-box green"></div>
+
+      <details style="margin-top:10px;">
+        <summary>📊 展開全品項點滴每公升升／降鈉幅度 (ΔNa/1L) 與所需流速總覽表</summary>
+        <div class="details-body" style="padding:0;">
+          <div class="table-scroll" style="margin:0; border:0;">
+            <table>
+              <thead>
+                <tr>
+                  <th>點滴種類</th>
+                  <th>有效 (Na + K) 濃度</th>
+                  <th>每輸注 1L 對血鈉影響 (ΔNa/1L)</th>
+                  <th>達成目標所需流速</th>
+                  <th>臨床安全提示</th>
+                </tr>
+              </thead>
+              <tbody id="all-fluids-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </details>
+    </div>
+
+    <!-- 5C. 過度矯正救援計算機 (Overcorrection Rescue: D5W + DDAVP) -->
+    <div style="background:#fff5f5; border:1.5px solid var(--red-bd); border-radius:12px; padding:15px;">
+      <h3 style="margin:0 0 8px; font-size:1.03rem; color:var(--red);">🛟 5C. 過度矯正降鈉救援計算機 (Overcorrection Rescue：D5W 自由水 ＋ Desmopressin DDAVP)</h3>
+      <p style="margin:0 0 10px; font-size:0.84rem; color:var(--body);">
+        適用情境：當 24h 血鈉升幅已超過安全上限（高風險 &gt; 6–8 mEq/L、一般慢性 &gt; 8–10 mEq/L），或治療中突發大量水利尿（UOP &gt; 100–200 mL/h）需立即踩煞車並將血鈉溫和調降回安全上限內。
+      </p>
+
+      <div class="grid-2" style="max-width: 560px;">
+        <div class="field" style="margin-bottom:0;">
+          <label for="rescue-current-na">過度矯正後目前血鈉 (Current Na)</label>
+          <div class="input-wrap">
+            <input id="rescue-current-na" type="number" min="90" max="170" step="0.5" placeholder="如 124" inputmode="decimal">
+            <span class="unit">mEq/L</span>
+          </div>
+        </div>
+        <div class="field" style="margin-bottom:0;">
+          <label for="rescue-target-na">希望重新降回之目標血鈉 (Target Na)</label>
+          <div class="input-wrap">
+            <input id="rescue-target-na" type="number" min="85" max="165" step="0.5" placeholder="如 120" inputmode="decimal">
+            <span class="unit">mEq/L</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="rescue-result-box" class="alert-box red" style="margin-top:10px;"></div>
+    </div>
+  </section>
+
+  <!-- ==================== 原始流程圖與實證文獻 ==================== -->
+  <section class="step-card" id="refs">
+    <div class="step-header">
+      <div class="step-title-group">
+        <span class="step-num">FIGURES &amp; REFS</span>
+        <h2>原始臨床指引流程圖（點擊放大）與實證參考文獻</h2>
+      </div>
+      <span class="step-badge">同步收錄於本 Repo references.md 與 assets/</span>
+    </div>
+
+    <div class="fig-grid">
+      <div class="fig-card">
+        <img src="./assets/fig1-ese-algorithm.png" alt="ESE 2014 歐洲低血鈉診斷演算法流程圖" data-lightbox-title="圖 1：歐洲臨床指引 (ESE 2014) 低血鈉診斷演算法（先看 Urine Osmolality，再看 Urine Na）">
+        <div class="fig-caption">圖 1：歐洲指引 (ESE 2014) 尿液優先演算法</div>
+      </div>
+      <div class="fig-card">
+        <img src="./assets/fig2-geekymedics-assessment.png" alt="Geeky Medics 低血鈉評估流程圖" data-lightbox-title="圖 2：Geeky Medics 體液狀態分類流程圖（Hypovolaemic / Euvolaemic / Hypervolaemic）">
+        <div class="fig-caption">圖 2：臨床體液狀態評估流程圖 (Geeky Medics)</div>
+      </div>
+      <div class="fig-card">
+        <img src="./assets/fig3-diagnostic-algorithm.png" alt="經典教科書低血鈉診斷演算法 Figure 43-2" data-lightbox-title="圖 3：經典教科書低血鈉診斷流程圖（P_Na < 135 → P_osm → U_osm → ECF_vol）">
+        <div class="fig-caption">圖 3：教科書綜合診斷演算法 (Figure 43-2)</div>
+      </div>
+    </div>
+
+    <details style="margin-top: 14px;" open>
+      <summary>📚 核心實證指引、公式來源與文獻連結（點擊收合）</summary>
+      <div class="details-body">
+        <ol style="margin:0; padding-left:1.3rem; line-height:1.65;">
+          <li><b>歐洲臨床實踐指引 (ESE / ESICM / ERA-EDTA 2014)</b>：Spasovski G, et al. <i>Clinical practice guideline on diagnosis and treatment of hyponatraemia.</i> Eur J Endocrinol. 2014;170(3):G1–G47. <a href="https://academic.oup.com/ejendo/article/170/3/G1/6668028" target="_blank" rel="noopener">全文連結</a></li>
+          <li><b>美國專家共識建議 (US Expert Panel 2013)</b>：Verbalis JG, et al. <i>Diagnosis, evaluation, and treatment of hyponatremia: expert panel recommendations.</i> Am J Med. 2013;126(10 Suppl 1):S1–S42. <a href="https://pubmed.ncbi.nlm.nih.gov/24074529/" target="_blank" rel="noopener">PubMed</a></li>
+          <li><b>AAFP 急診與住院實務指引 (AAFP 2015)</b>：Braun MM, et al. <i>Diagnosis and management of sodium disorders: hyponatremia and hypernatremia.</i> Am Fam Physician. 2015;91(5):299–307. <a href="https://www.aafp.org/afp/2015/0301/p299.pdf" target="_blank" rel="noopener">PDF 原文</a></li>
+          <li><b>SALSA 隨機臨床試驗 (JAMA Intern Med 2021)</b>：Baek SH, et al. <i>Risk of Overcorrection in Rapid Intermittent Bolus vs Slow Continuous Infusion Therapies of Hypertonic Saline for Patients With Symptomatic Hyponatremia.</i> JAMA Intern Med. 2021;181(1):81–92. <a href="https://doi.org/10.1001/jamainternmed.2020.5519" target="_blank" rel="noopener">DOI 連結</a></li>
+          <li><b>滲透壓、有效張力與無效溶質診斷推理 (PMC13424767, 2026)</b>：<i>Diagnostic Reasoning in Hyponatremia: Osmolality, Tonicity, and Osmolal Gap.</i> J Investig Med High Impact Case Rep. 2026. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC13424767/" target="_blank" rel="noopener">PMC 全文</a>｜<a href="https://journals.sagepub.com/doi/10.1177/23247096261474690" target="_blank" rel="noopener">Sage 期刊</a></li>
+          <li><b>嚴重低血鈉安全矯正與 SIAD 最新綜論 (2024)</b>：Sterns RH. <i>Treatment of Severe Hyponatremia.</i> CJASN 2024 (<a href="https://doi.org/10.2215/CJN.0000000000000244" target="_blank" rel="noopener">DOI</a>)；Adrogué HJ, Madias NE. <i>The Syndrome of Inappropriate Antidiuresis.</i> NDT 2024 (<a href="https://academic.oup.com/ndt/article/39/10/1583/7713921" target="_blank" rel="noopener">DOI</a>).</li>
+          <li><b>Adrogué-Madias 公式與 MDCalc #480</b>：Adrogué HJ, Madias NE. <i>Hyponatremia.</i> N Engl J Med. 2000;342(21):1581–1589. 對照 <a href="https://www.mdcalc.com/calc/480/sodium-correction-rate-hyponatremia-hypernatremia" target="_blank" rel="noopener">MDCalc #480</a> 及 Watson PE, et al. <i>Total body water volumes for adult males and females.</i> Am J Clin Nutr. 1980.</li>
+        </ol>
+      </div>
+    </details>
+  </section>
+
+  <!-- 免責聲明 -->
+  <div class="disc">
+    ⚠️ <b>臨床安全與免責聲明：</b>本工具專為<b>成人急診與住院患者</b>設計，僅供醫療專業人員作為臨床決策與教學「輔助參考」，不取代醫師臨床判斷、正式醫囑、院內藥事調配規範、官方仿單與最新臨床指引。
+    Adrogué-Madias 與自由水公式均為封閉系統算術估計，<b>無法預測治療途中因低血容解除或溶質補充所觸發之突發性大量水利尿（Brisk water diuresis）</b>；使用 3% NaCl 或進行降鈉救援時，必須密集追蹤實測血鈉（q1–4h）與每小時尿量，並由醫師與藥師雙重人工覆核。
+    本頁面不儲存任何病患個資至瀏覽器或伺服器。（資料最後校對：2026-10-25｜<a href="https://github.com/xyzKIWI/na" target="_blank" rel="noopener">GitHub Repo</a>）
+  </div>
+</main>
+
+<!-- Lightbox 彈窗 -->
+<div class="lightbox" id="lightbox" hidden role="dialog" aria-modal="true" aria-label="流程圖放大檢視">
+  <img id="lightbox-img" src="" alt="">
+  <div class="lightbox-bar">
+    <span id="lightbox-caption"></span>
+    <button type="button" class="lightbox-close" id="lightbox-close">關閉 (Esc)</button>
+  </div>
+</div>
+
+<!-- 底部常駐操作列 -->
+<div class="bottom-bar">
+  <div class="bottom-inner">
+    <div class="live-status" id="bottom-live-status">請輸入實測血鈉 (Serum Na) 與臨床症狀開始評估</div>
+    <div class="bottom-actions">
+      <button type="button" class="btn-sm btn-clear" id="btn-clear-bottom">清除重填</button>
+      <button type="button" class="btn-primary" id="btn-copy-summary">📋 複製臨床評估摘要 (EMR Note)</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import {
+    parseOptionalNumber,
+    calculateTbw,
+    evaluateStep1Triage,
+    evaluateStep2Osmolality,
+    evaluateStep3And4UrineAndClassification,
+    calculate3PercentMixing,
+    calculateInfusionPlan,
+    calculateOvercorrectionRescue,
+    createSessionEvaluationStore,
+  } from "./na.js";
+
+  // 1. 動態修正返回首頁連結：在 github.io 時指回 https://xyzkiwi.github.io/ed-tools/，其餘網域指回同站根目錄 /
+  const backLink = document.getElementById("back-home-link");
+  if (location.hostname.endsWith("github.io")) {
+    backLink.href = "https://xyzkiwi.github.io/ed-tools/";
+  } else if (
+    location.hostname === "er.kiwi-ai.uk" ||
+    location.hostname === "tools.kiwi-ai.uk" ||
+    location.hostname.endsWith(".pages.dev")
+  ) {
+    backLink.href = "/";
+  }
+
+  const sessionStore = createSessionEvaluationStore();
+  const copyBtn = document.getElementById("btn-copy-summary");
+  let lastCustomMixMeqL = 513.347;
+
+  const $ = (id) => document.getElementById(id);
+
+  function fmt(num, digits = 1) {
+    if (!Number.isFinite(num)) return "—";
+    return Number.isInteger(num) && digits === 0 ? String(num) : num.toFixed(digits);
+  }
+
+  // 當任何輸入變動時，立即使舊複製狀態失效並重新即時運算
+  function onAnyInputChanged(event) {
+    sessionStore.markInputChanged();
+    copyBtn.textContent = "📋 複製臨床評估摘要 (EMR Note)";
+
+    // 自動連動：當實測血鈉 <= 105 時自動勾選主要 ODS 風險
+    const sNa = parseOptionalNumber($("serum-na").value);
+    if (sNa !== null && !Number.isNaN(sNa) && sNa <= 105) {
+      $("ods-na105").checked = true;
+    } else if (event && event.target && event.target.id === "serum-na" && sNa > 105) {
+      $("ods-na105").checked = false;
+    }
+
+    // 當實測血鉀 < 3.5 時自動勾選主要 ODS 風險
+    const sK = parseOptionalNumber($("serum-k").value);
+    if (sK !== null && !Number.isNaN(sK) && sK < 3.5) {
+      $("ods-hypok").checked = true;
+    } else if (event && event.target && event.target.id === "serum-k" && sK >= 3.5) {
+      $("ods-hypok").checked = false;
+    }
+
+    // 若使用者勾選了嚴重或中度症狀 checkbox，自動同步上方 radio
+    if (event && event.target && event.target.classList.contains("sym-severe-cb")) {
+      const anySevere = [...document.querySelectorAll(".sym-severe-cb:checked")].length > 0;
+      if (anySevere) {
+        document.querySelector('input[name="symptom-severity"][value="severe"]').checked = true;
+      }
+    } else if (event && event.target && event.target.classList.contains("sym-mod-cb")) {
+      const anySevere = [...document.querySelectorAll(".sym-severe-cb:checked")].length > 0;
+      const anyMod = [...document.querySelectorAll(".sym-mod-cb:checked")].length > 0;
+      if (!anySevere && anyMod) {
+        document.querySelector('input[name="symptom-severity"][value="moderate"]').checked = true;
+      }
+    }
+
+    // 切換泡製模式 A / B 顯示
+    const mixMode = document.querySelector('input[name="mix-mode"]:checked')?.value || "mode_a_ampoules";
+    $("mix-mode-a-inputs").hidden = mixMode !== "mode_a_ampoules";
+    $("mix-mode-b-inputs").hidden = mixMode !== "mode_b_isovolumetric";
+
+    recalculateAll();
+  }
+
+  function recalculateAll() {
+    const serumNa = parseOptionalNumber($("serum-na").value);
+    const weightKg = parseOptionalNumber($("weight-kg").value);
+    const sex = $("sex").value;
+    const ageYears = parseOptionalNumber($("age-years").value);
+    const heightCm = parseOptionalNumber($("height-cm").value);
+    const tbwMethod = $("tbw-method").value;
+
+    // 1. 計算 TBW
+    const tbwResult = calculateTbw({
+      weightKg,
+      sex,
+      ageYears,
+      heightCm,
+      method: tbwMethod,
+    });
+    $("tbw-live-hint").textContent = tbwResult.tbwL
+      ? `目前 TBW = ${tbwResult.tbwL.toFixed(1)} L (${tbwResult.methodUsed === "watson" ? "Watson 公式" : `係數 ${tbwResult.factor}`})`
+      : "輸入體重後自動計算總體液量 TBW";
+
+    // 2. 先算 Step 5A 床邊泡製，以便回代實際濃度給自訂泡製液
+    const mixMode = document.querySelector('input[name="mix-mode"]:checked')?.value || "mode_a_ampoules";
+    let mixingResult = null;
+    try {
+      if (mixMode === "mode_b_isovolumetric") {
+        mixingResult = calculate3PercentMixing({
+          mode: "mode_b_isovolumetric",
+          baseFluidPercent: Number($("mix-b-base-pct").value),
+          bagVolumeMl: parseOptionalNumber($("mix-b-bag-vol").value) || 500,
+          targetPercent: parseOptionalNumber($("mix-b-target-pct").value) || 3.0,
+        });
+      } else {
+        mixingResult = calculate3PercentMixing({
+          mode: "mode_a_ampoules",
+          baseFluidPercent: Number($("mix-base-pct").value),
+          bagVolumeMl: parseOptionalNumber($("mix-bag-vol").value) || 500,
+          withdrawMl: parseOptionalNumber($("mix-withdraw-ml").value) ?? 100,
+          ampouleCount: parseOptionalNumber($("mix-amp-count").value) ?? 6,
+        });
+      }
+      lastCustomMixMeqL = mixingResult.finalMeqL;
+    } catch {
+      mixingResult = null;
+    }
+    renderMixingResult(mixingResult);
+
+    // 3. Step 1 急症分流與 24h 安全上限
+    const symptomSeverity =
+      document.querySelector('input[name="symptom-severity"]:checked')?.value || "mild_none";
+    const severeSymptomsList = [...document.querySelectorAll(".sym-severe-cb:checked")].map(
+      (el) => el.value,
+    );
+    const moderateSymptomsList = [...document.querySelectorAll(".sym-mod-cb:checked")].map(
+      (el) => el.value,
+    );
+
+    const step1 = evaluateStep1Triage({
+      serumNa,
+      symptomSeverity,
+      severeSymptomsList,
+      moderateSymptomsList,
+      onset: $("onset-time").value,
+      regimenKey: $("bolus-regimen").value,
+      limitGuideline: $("limit-guideline").value,
+      weightKg,
+      tbwL: tbwResult.tbwL,
+      serumK: parseOptionalNumber($("serum-k").value),
+      majorOdsFlags: {
+        naLe105: $("ods-na105").checked,
+        hypokalemia: $("ods-hypok").checked,
+        alcoholism: $("ods-alcohol").checked,
+        malnutrition: $("ods-malnutrition").checked,
+        liverDisease: $("ods-liver").checked,
+      },
+      secondaryOdsFlags: {
+        olderFemaleThiazide: $("ods-sec-thiazide").checked,
+        lowSolutePolydipsia: $("ods-sec-polydipsia").checked,
+      },
+      initialNa24h: parseOptionalNumber($("initial-na-24h").value),
+      priorRise24hInput: parseOptionalNumber($("prior-rise-24h").value),
+      elapsedHours24h: parseOptionalNumber($("elapsed-hours-24h").value),
+      includePlannedBolusInQuota: $("include-bolus-quota").checked,
+      customBolusConcMeqL: 513.3,
+    });
+    renderStep1(step1);
+
+    // 4. Step 2 血清滲透壓與有效張力
+    const step2 = evaluateStep2Osmolality({
+      serumNa,
+      measuredOsm: parseOptionalNumber($("measured-osm").value),
+      glucoseMgDl: parseOptionalNumber($("glucose-mgdl").value),
+      bunMgDl: parseOptionalNumber($("bun-mgdl").value),
+      ethanolMgDl: parseOptionalNumber($("ethanol-mgdl").value),
+      iseMethod: $("ise-method").value,
+    });
+    renderStep2(step2);
+
+    // 5. Step 3 & 4 尿液與 6 大分類
+    const volumeStatus =
+      document.querySelector('input[name="volume-status"]:checked')?.value || "equivocal";
+    const step34 = evaluateStep3And4UrineAndClassification({
+      serumNa,
+      urineOsm: parseOptionalNumber($("urine-osm").value),
+      urineNa: parseOptionalNumber($("urine-na").value),
+      urineK: parseOptionalNumber($("urine-k").value),
+      volumeStatus,
+      uNaCutoffMode: Number($("una-cutoff-mode").value),
+      confounders: {
+        onDiuretics: $("conf-diuretics").checked,
+        vomitingNg: $("conf-vomiting").checked,
+        priorSaline: $("conf-saline").checked,
+        nonConcurrentLab: $("conf-nonconcurrent").checked,
+      },
+      feInputs: {
+        serumCr: parseOptionalNumber($("serum-cr").value),
+        urineCr: parseOptionalNumber($("urine-cr").value),
+        serumUrea: parseOptionalNumber($("bun-mgdl").value),
+        urineUrea: parseOptionalNumber($("urine-urea").value),
+        ureaUnitMode: $("urea-unit-mode").value,
+        serumUa: parseOptionalNumber($("serum-ua").value),
+        urineUa: parseOptionalNumber($("urine-ua").value),
+        urineCl: parseOptionalNumber($("urine-cl").value),
+      },
+    });
+    renderStep34(step1, step2, step34);
+
+    // 6. Step 5B 點滴速率計算機
+    const infusionPlan = calculateInfusionPlan({
+      serumNa,
+      tbwL: tbwResult.tbwL,
+      infusateKey: $("infusate-select").value,
+      customInfusateConcMeqL: lastCustomMixMeqL,
+      addedKMeqL: parseOptionalNumber($("added-k-meql").value) || 0,
+      targetDeltaNaMeqL: parseOptionalNumber($("target-delta-na").value) ?? 5,
+      timeHours: parseOptionalNumber($("infusion-hours").value) || 24,
+      remainingHardLimit24h: step1.remainingHardLimit24h,
+      desalinationRisk: step34.desalinationRisk,
+      categoryId: step34.primaryCategory?.id || null,
+    });
+    renderInfusionPlan(infusionPlan, tbwResult);
+
+    // 7. Step 5C 過度矯正救援計算機
+    const rescueCurrentNa =
+      parseOptionalNumber($("rescue-current-na").value) ??
+      (step1.overcorrectionStatus === "exceeded_hard_limit" && Number.isFinite(serumNa)
+        ? serumNa
+        : null);
+    const rescueTargetNa =
+      parseOptionalNumber($("rescue-target-na").value) ??
+      (Number.isFinite(rescueCurrentNa) ? rescueCurrentNa - 4 : null);
+
+    const rescueResult = calculateOvercorrectionRescue({
+      currentNa: rescueCurrentNa,
+      targetRelowerNa: rescueTargetNa,
+      weightKg,
+      tbwL: tbwResult.tbwL,
+    });
+    renderRescueResult(rescueResult);
+
+    // 8. 提交最新狀態至記憶體 Store 並更新底部狀態列
+    const committed = sessionStore.commitEvaluation({
+      tbwResult,
+      step1,
+      step2,
+      step34,
+      infusionPlan,
+      mixingResult,
+      rescueResult,
+    });
+    updateBottomBar(step1, step2, step34, infusionPlan, committed);
+  }
+
+  function renderStep1(step1) {
+    const emPanel = $("step1-emergency-panel");
+    if (step1.isEmergencyBolusIndicated && step1.activeStepProtocol) {
+      emPanel.hidden = false;
+      emPanel.className =
+        step1.effectiveSeverity === "severe" ? "alert-box red" : "alert-box amber";
+
+      const p = step1.activeStepProtocol;
+      let bolusMathHtml = "";
+      if (step1.bolus100 && step1.bolus150) {
+        bolusMathHtml = `
+          <div class="kpi-row" style="margin:10px 0;">
+            <div class="kpi-card">
+              <div class="kpi-label">單次 100 mL 3% NaCl (US)</div>
+              <div class="kpi-val">+${step1.bolus100.deltaNaFinite.toFixed(2)} mEq/L</div>
+              <div class="kpi-sub">有限體積公式 V(C−S)/(W+V)</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">單次 150 mL 3% NaCl (ESE)</div>
+              <div class="kpi-val">+${step1.bolus150.deltaNaFinite.toFixed(2)} mEq/L</div>
+              <div class="kpi-sub">2 次 150 mL 約 +${(step1.bolus150.deltaNaFinite * 2).toFixed(2)} mEq/L</div>
+            </div>
+            ${
+              step1.bolus2MlKg
+                ? `<div class="kpi-card">
+                    <div class="kpi-label">2 mL/kg = ${step1.bolus2MlKg.bolusMl} mL (SALSA)</div>
+                    <div class="kpi-val">+${step1.bolus2MlKg.deltaNaFinite.toFixed(2)} mEq/L</div>
+                    <div class="kpi-sub">依體重計算單次預期升幅</div>
+                  </div>`
+                : ""
+            }
+          </div>
+        `;
+      } else {
+        bolusMathHtml = `<p style="margin:6px 0; font-size:0.84rem;">💡 <i>輸入上方「實測血鈉 (Serum Na)」與「體重 (Weight)」後，此處將即時試算該病患單次 100 mL / 150 mL / 2 mL/kg Bolus 的精確升鈉幅度。</i></p>`;
+      }
+
+      emPanel.innerHTML = `
+        <div class="alert-title">
+          <span>${step1.effectiveSeverity === "severe" ? "🚨 嚴重神經學急症：立即啟動 3% NaCl IV Bolus" : "⚠️ 中度嚴重神經學症狀：建議 3% NaCl 治療"}</span>
+          <span class="step-badge">${step1.regimen.name}</span>
+        </div>
+        <div style="font-size:0.9rem; font-weight:750; margin-bottom:4px;">▶ ${p.title}</div>
+        ${bolusMathHtml}
+        <ul class="cat-list">
+          <li><b>給藥與重複規則：</b>${p.repeatRule}</li>
+          <li><b>停止 Bolus 條件：</b>${p.stopRule}</li>
+          <li><b>抽血與監測頻率：</b>${p.recheckRule}</li>
+        </ul>
+      `;
+    } else {
+      emPanel.hidden = true;
+      emPanel.innerHTML = "";
+    }
+
+    const limPanel = $("step1-limits-panel");
+    const lim = step1.limits;
+    limPanel.className =
+      step1.overcorrectionStatus === "exceeded_hard_limit"
+        ? "alert-box red"
+        : step1.hasMajorOdsRisk
+          ? "alert-box amber"
+          : "alert-box teal";
+
+    limPanel.innerHTML = `
+      <div class="alert-title">
+        <span>🛡️ 安全矯正目標與 24h 累計配額：${lim.profileName}</span>
+        <span class="step-badge">${step1.hasMajorOdsRisk ? "高 ODS 風險群 (上限 ≤ 8)" : "標準慢性安全基準 (上限 ≤ 10)"}</span>
+      </div>
+      <div class="kpi-row">
+        <div class="kpi-card">
+          <div class="kpi-label">24h 建議目標升幅 (Target)</div>
+          <div class="kpi-val">${lim.targetMin24h}–${lim.targetMax24h} mEq/L</div>
+          <div class="kpi-sub">建議中心目標：+${lim.recommendedTarget24h} mEq/L</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">24h 減速警示門檻 (Warning)</div>
+          <div class="kpi-val">${lim.warning24h} mEq/L</div>
+          <div class="kpi-sub">達此門檻應暫停高張鹽水</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">24h / 48h 絕對上限 (Ceiling)</div>
+          <div class="kpi-val">≤ ${lim.hardLimit24h} / ≤ ${lim.hardLimit48h}</div>
+          <div class="kpi-sub">次日 24h 上限 ≤ ${lim.hardLimitSecond24h} mEq/L</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">扣除已升幅度後・剩餘配額</div>
+          <div class="kpi-val" style="color:${step1.remainingHardLimit24h <= 2 ? "var(--red)" : "var(--teal-dark)"};">
+            目標剩 +${step1.remainingRecommendedTarget24h.toFixed(1)} (上限剩 +${step1.remainingHardLimit24h.toFixed(1)})
+          </div>
+          <div class="kpi-sub">已升 +${step1.priorRise24h.toFixed(1)}${step1.plannedBolusRise > 0 ? ` + 本次 Bolus +${step1.plannedBolusRise.toFixed(1)}` : ""} mEq/L</div>
+        </div>
+      </div>
+      ${
+        step1.activeMajorOdsReasons.length > 0
+          ? `<p style="margin:8px 0 0; font-size:0.84rem;"><b>已觸發主要 ODS 風險因子：</b>${step1.activeMajorOdsReasons.join("、")}</p>`
+          : ""
+      }
+      ${
+        step1.activeSecondaryOdsReasons.length > 0
+          ? `<p style="margin:4px 0 0; font-size:0.82rem;"><b>次要留意修飾因子：</b>${step1.activeSecondaryOdsReasons.join("、")}</p>`
+          : ""
+      }
+      ${
+        step1.overcorrectionAlert
+          ? `<div style="margin-top:8px; padding:8px 11px; border-radius:8px; background:#fff; border:1.5px solid var(--red); color:var(--red); font-weight:750; font-size:0.86rem;">${step1.overcorrectionAlert}</div>`
+          : ""
+      }
+    `;
+  }
+
+  function renderStep2(step2) {
+    const kpiContainer = $("step2-kpis");
+    const resPanel = $("step2-result-panel");
+
+    if (!step2.isValid) {
+      kpiContainer.innerHTML = "";
+      resPanel.className = "alert-box teal";
+      resPanel.innerHTML = `<div class="alert-title">請先於 Step 1 輸入實測血鈉 (Serum Na)</div>`;
+      return;
+    }
+
+    kpiContainer.innerHTML = `
+      <div class="kpi-card">
+        <div class="kpi-label">有效滲透壓／張力 (Effective Tonicity)</div>
+        <div class="kpi-val">${fmt(step2.effectiveOsm, 1)} <small>mOsm/kg</small></div>
+        <div class="kpi-sub">公式：2×Na + Glucose/18（不含 BUN/乙醇）</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">計算總滲透壓 (Calculated Osm)</div>
+        <div class="kpi-val">${fmt(step2.calculatedOsmNoEthanol, 1)} <small>mOsm/kg</small></div>
+        <div class="kpi-sub">${step2.ethanolMgDl > 0 ? `含乙醇後：${fmt(step2.calculatedOsmWithEthanol, 1)} mOsm/kg` : "公式：2×Na + Glc/18 + BUN/2.8"}</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">滲透壓間隙 (Osmolal Gap)</div>
+        <div class="kpi-val" style="color:${step2.osmolalGapNoEthanol !== null && step2.osmolalGapNoEthanol > 10 ? "var(--red)" : "var(--navy)"};">
+          ${step2.osmolalGapNoEthanol !== null ? `${fmt(step2.osmolalGapNoEthanol, 1)} mOsm/kg` : "待填實測 Osm"}
+        </div>
+        <div class="kpi-sub">Measured − Calculated（&gt;10 提示外源溶質）</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">高血糖校正血鈉 (MDCalc #50)</div>
+        <div class="kpi-val">
+          ${step2.katzCorrectedNa !== null ? `Katz ${fmt(step2.katzCorrectedNa, 1)}` : "待填血糖"}
+        </div>
+        <div class="kpi-sub">${step2.hillierCorrectedNa !== null ? `Hillier (+2.4): ${fmt(step2.hillierCorrectedNa, 1)} mEq/L` : "僅用於評估高血糖轉移，不代入滲透壓公式"}</div>
+      </div>
+    `;
+
+    $("step2-badge").textContent = step2.branchBadge || "滲透壓判讀";
+    resPanel.className =
+      step2.branchId === "hypotonic_with_ineffective_osmoles"
+        ? "alert-box amber"
+        : step2.proceedToStep3
+          ? "alert-box green"
+          : "alert-box teal";
+
+    resPanel.innerHTML = `
+      <div class="alert-title">
+        <span>🔍 Step 2 判讀結論：${step2.branchTitle}</span>
+      </div>
+      <p style="margin:4px 0 8px; font-size:0.88rem;">${step2.clinicalSummary}</p>
+      <div style="font-size:0.86rem; font-weight:700; color:var(--navy);">▶ 下一步臨床建議：${step2.nextAction}</div>
+    `;
+  }
+
+  function renderStep34(step1, step2, step34) {
+    // 更新流程圖高亮節點
+    const allNodeIds = [
+      "fnode-triage",
+      "fnode-tonicity",
+      "fnode-uosm-low",
+      "fnode-uosm-high",
+      "fnode-cat1",
+      "fnode-cat2",
+      "fnode-cat3",
+      "fnode-cat5",
+      "fnode-cat6",
+    ];
+    allNodeIds.forEach((id) => {
+      const el = $(id);
+      if (el) el.className = "flow-node";
+    });
+
+    if (step1.isEmergencyBolusIndicated) {
+      $("fnode-triage").classList.add("active-danger");
+    } else if (Number.isFinite(step1.serumNa)) {
+      $("fnode-triage").classList.add("active");
+    }
+
+    if (step2.isValid) {
+      $("fnode-tonicity").classList.add("active");
+    }
+
+    if (step34.hasUrineOsm) {
+      if (step34.urineOsm <= 100) {
+        $("fnode-uosm-low").classList.add("active");
+      } else {
+        $("fnode-uosm-high").classList.add("active");
+      }
+    }
+
+    const catNodeMap = {
+      cat1_hypovol_low_una: "fnode-cat1",
+      cat2_hypovol_high_una: "fnode-cat2",
+      cat3_euvol_adh: "fnode-cat3",
+      cat5_hypervol_low_una: "fnode-cat5",
+      cat6_hypervol_high_una: "fnode-cat6",
+    };
+    step34.candidateCategories.forEach((c) => {
+      const targetId = catNodeMap[c.id];
+      if (targetId && $(targetId)) {
+        $(targetId).classList.add("active");
+      }
+    });
+
+    // 渲染尿液 KPI
+    const kpiHtml = [];
+    if (step34.urineElectrolyteSum !== null) {
+      kpiHtml.push(`
+        <div class="kpi-card">
+          <div class="kpi-label">尿鈉＋尿鉀 (U_Na + U_K) 與 Fürst Ratio</div>
+          <div class="kpi-val" style="color:${step34.urineElectrolyteSum > 154 ? "var(--red)" : "var(--navy)"};">
+            ${fmt(step34.urineElectrolyteSum, 0)} mEq/L ${step34.furstRatio !== null ? `(Ratio ${fmt(step34.furstRatio, 2)})` : ""}
+          </div>
+          <div class="kpi-sub">${step34.furstInterpretation || "比較尿液與血漿有效電解質濃度"}</div>
+        </div>
+      `);
+    }
+    if (step34.feUrea !== null) {
+      kpiHtml.push(`
+        <div class="kpi-card">
+          <div class="kpi-label">尿素排泄分率 (FE_Urea)</div>
+          <div class="kpi-val">${fmt(step34.feUrea, 1)}%</div>
+          <div class="kpi-sub">${step34.feUreaInterpretation}</div>
+        </div>
+      `);
+    }
+    if (step34.feUa !== null) {
+      kpiHtml.push(`
+        <div class="kpi-card">
+          <div class="kpi-label">尿酸排泄分率 (FE_UA)</div>
+          <div class="kpi-val">${fmt(step34.feUa, 1)}%</div>
+          <div class="kpi-sub">${step34.feUaInterpretation}</div>
+        </div>
+      `);
+    }
+    $("step34-kpis").innerHTML = kpiHtml.join("");
+
+    // 渲染干擾與脫鹽警示
+    const warnBoxes = [];
+    if (step34.desalinationMessage) {
+      warnBoxes.push(`
+        <div class="alert-box ${step34.desalinationRisk === "high_confirmed" ? "red" : "amber"}">
+          <div class="alert-title"><span>${step34.desalinationMessage}</span></div>
+        </div>
+      `);
+    }
+    if (step34.confounderWarnings.length > 0 || step34.serumUaNote || step34.urineClNote) {
+      const items = [
+        ...step34.confounderWarnings,
+        step34.serumUaNote,
+        step34.urineClNote,
+      ].filter(Boolean);
+      warnBoxes.push(`
+        <div class="alert-box amber">
+          <div class="alert-title"><span>⚠️ 尿液判讀干擾校正與輔助指標提示</span></div>
+          <ul class="cat-list">
+            ${items.map((w) => `<li>${w}</li>`).join("")}
+          </ul>
+        </div>
+      `);
+    }
+    $("step34-warnings").innerHTML = warnBoxes.join("");
+
+    // 渲染 Step 4 六大分類結果卡片
+    const out = $("step4-category-output");
+    if (!step34.hasUrineOsm) {
+      out.innerHTML = `
+        <div class="alert-box teal">
+          <div class="alert-title">請輸入 Urine Osmolality 與 Urine Na 以自動配對 6 大臨床分類</div>
+          <p style="margin:0; font-size:0.85rem;">提示：Urine Osm ≤ 100 mOsm/kg 為極度稀釋尿（原發性多飲、低溶質攝取、Beer potomania）；Urine Osm &gt; 100 mOsm/kg 則代表存在 ADH 活性，需進一步搭配 Urine Na 與體液狀態分類。</p>
+        </div>
+      `;
+      return;
+    }
+
+    if (step34.classificationMode === "pending_una") {
+      out.innerHTML = `
+        <div class="alert-box teal">
+          <div class="alert-title">Urine Osm = ${step34.urineOsm} mOsm/kg (&gt; 100，反映 ADH 活性存在) — 請接著輸入 Urine Na</div>
+        </div>
+      `;
+      return;
+    }
+
+    const isEquivocal = step34.classificationMode === "equivocal_volume_comparison";
+    const headerNote = isEquivocal
+      ? `<div class="alert-box amber" style="margin-bottom:10px;">
+          <div class="alert-title"><span>❓ 臨床體液狀態設為「不確定 (Equivocal)」— 已為您並列候選分類與下一步鑑別檢查</span></div>
+          <p style="margin:0; font-size:0.85rem;">
+            <b>下一步床邊鑑別建議：</b>① 測量姿位性血壓／心跳與 POCUS（IVC 塌陷度、肺部 B-lines）；② 檢驗 Morning Cortisol、TSH、Serum Uric Acid（&lt; 4 mg/dL 支持 SIADH/CSW，&gt; 5 mg/dL 支持低血容）與 FE_Urea / FE_UA；③ 若懷疑嘔吐低血容測 Urine Cl (&lt; 20 mEq/L)。<b>切勿在 U_Osm &gt; 500 或 U_Na+U_K &gt; 154 時盲目用 0.9% NaCl 做診斷性輸液測試！</b>
+          </p>
+        </div>`
+      : "";
+
+    const cardsHtml = step34.candidateCategories
+      .map((cat, idx) => {
+        const isPrimary = idx === 0;
+        return `
+          <div class="cat-detail-card ${isPrimary ? "" : "secondary"}">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:6px;">
+              <span class="step-num" style="background:${isPrimary ? "var(--teal)" : "var(--muted)"};">
+                ${isPrimary ? (isEquivocal ? "主要候選 1" : "自動配對主分類") : `鑑別候選 ${idx + 1}`}・${cat.code}
+              </span>
+              <span style="font-size:0.76rem; color:var(--muted); font-weight:700;">${cat.criteriaText}</span>
+            </div>
+            <h3>${cat.name}</h3>
+            <p style="margin:4px 0 8px; font-size:0.84rem; color:var(--body); background:#f8fafc; padding:7px 10px; border-radius:7px;">
+              <b>生理機轉：</b>${cat.physiology}
+            </p>
+            <div class="cat-section-title">典型鑑別診斷 (Typical Diagnoses)</div>
+            <ul class="cat-list">
+              ${cat.typicalDiagnoses.map((d) => `<li>${d}</li>`).join("")}
+            </ul>
+            ${
+              cat.mandatoryExclusions
+                ? `<div class="cat-section-title" style="color:var(--red);">🚨 診斷 SIADH 前必備排除清單 (Mandatory Exclusions)</div>
+                   <ul class="cat-list">
+                     ${cat.mandatoryExclusions.map((e) => `<li>${e}</li>`).join("")}
+                   </ul>`
+                : ""
+            }
+            <div class="cat-section-title" style="color:var(--green);">標準處置建議 (Usual Management)</div>
+            <ul class="cat-list">
+              ${cat.usualManagement.map((m) => `<li>${m}</li>`).join("")}
+            </ul>
+            <div class="cat-section-title" style="color:var(--amber);">臨床陷阱與安全警示 (Pitfalls)</div>
+            <ul class="cat-list">
+              ${cat.pitfalls.map((p) => `<li>${p}</li>`).join("")}
+            </ul>
+          </div>
+        `;
+      })
+      .join("");
+
+    out.innerHTML = `${headerNote}<div class="cat-cards">${cardsHtml}</div>`;
+  }
+
+  function renderMixingResult(mix) {
+    const box = $("mix-result-box");
+    if (!mix) {
+      box.innerHTML = "請確認泡製參數（抽出體積須小於點滴袋總量）。";
+      return;
+    }
+
+    if (mix.mode === "mode_a_ampoules") {
+      box.innerHTML = `
+        <div class="alert-title">
+          <span>✅ 模式 A（整支安瓿泡製）計算結果：實質濃度 <b>${mix.finalPercent.toFixed(2)}% NaCl (${mix.finalMeqL.toFixed(1)} mEq/L)</b></span>
+          <button type="button" class="btn-sm" id="btn-use-custom-mix">套用此濃度 (${mix.finalMeqL.toFixed(1)} mEq/L) 至 5B 速率計算</button>
+        </div>
+        <p style="margin:4px 0; font-size:0.88rem;">
+          <b>操作步驟參考：</b>取 <code>${mix.baseFluidPercent}% NaCl ${mix.bagVolumeMl} mL</code> 點滴袋，先抽出 <b>${mix.withdrawMl} mL</b> 丟棄（袋內剩 ${mix.remainingBaseMl} mL），再注入 <b>${mix.ampouleCount} 支</b> <code>10% NaCl (20 mL/amp，共 ${mix.addedAmpouleVolumeMl} mL)</code> → 混勻後<b>最終總體積 = ${mix.finalVolumeMl} mL</b>（總含鹽 ${mix.totalNaClGrams.toFixed(2)} g）。
+        </p>
+        <p style="margin:4px 0 0; font-size:0.78rem; color:var(--muted);">
+          ⚠️ 藥事安全提醒：商用軟袋可能含廠牌基礎餘量 (overfill)；此床邊快泡法僅供無商業預混 3% NaCl 袋之緊急情況參考，請務必於藥袋醒目標示「高張鹽水 ${mix.finalPercent.toFixed(2)}% (${mix.finalMeqL.toFixed(0)} mEq/L)」並經雙人覆核與輸液幫浦給藥。
+        </p>
+      `;
+    } else {
+      const cmp = mix.roundedWholeAmpouleComparison;
+      box.innerHTML = `
+        <div class="alert-title">
+          <span>✅ 模式 B（維持總量 ${mix.bagVolumeMl} mL 等體積精準抽換）：需抽換 <b>${mix.exactReplaceMl.toFixed(1)} mL</b>（約 ${mix.exactAmpoulesNeeded.toFixed(2)} 支）</span>
+          <button type="button" class="btn-sm" id="btn-use-custom-mix">套用 ${mix.finalMeqL.toFixed(1)} mEq/L 至 5B 速率計算</button>
+        </div>
+        <p style="margin:4px 0; font-size:0.88rem;">
+          <b>精準等體積抽換：</b>從 <code>${mix.baseFluidPercent}% NaCl ${mix.bagVolumeMl} mL</code> 抽出 <b>${mix.exactReplaceMl.toFixed(1)} mL</b> 丟棄（剩 ${mix.exactRemainingBaseMl.toFixed(1)} mL），並加入 <b>${mix.exactReplaceMl.toFixed(1)} mL</b> 的 <code>10% NaCl</code> ＝ 總體積維持 <b>${mix.finalVolumeMl} mL</b> 之 <b>${mix.finalPercent.toFixed(2)}% NaCl (${mix.finalMeqL.toFixed(1)} mEq/L)</b>。
+        </p>
+        <p style="margin:4px 0 0; font-size:0.82rem; color:var(--amber);">
+          💡 <b>整數支對照提醒：</b>若為圖整數方便而直接「抽掉 ${cmp.roundedReplaceMl} mL 並加入整數 ${cmp.roundedAmps} 支 (${cmp.roundedReplaceMl} mL) 維持 ${cmp.finalVolumeMl} mL」，實際濃度會變成 <b>${cmp.finalPercent.toFixed(3)}% (${cmp.finalMeqL.toFixed(1)} mEq/L)</b>。若希望剛好加入整數 6 支且維持正 3.00% (513.3 mEq/L)，請改用「模式 A（只抽 100 mL、加 120 mL、總量 520 mL）」。
+        </p>
+      `;
+    }
+
+    const useMixBtn = $("btn-use-custom-mix");
+    if (useMixBtn) {
+      useMixBtn.addEventListener("click", () => {
+        $("infusate-select").value = "custom_mix";
+        onAnyInputChanged();
+      });
+    }
+  }
+
+  function renderInfusionPlan(plan, tbwResult) {
+    const box = $("infusion-result-box");
+    const tbody = $("all-fluids-tbody");
+
+    if (!plan.isValid) {
+      box.className = "alert-box teal";
+      box.innerHTML = `<div class="alert-title">${plan.error}</div>`;
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--muted);">請先於 Step 1 輸入實測血鈉 (Serum Na) 與體重 (Weight)</td></tr>`;
+      return;
+    }
+
+    const sf = plan.selectedFluid;
+    const isAchievable = sf.status === "achievable" && sf.rateMlPerHour !== null;
+
+    box.className =
+      sf.isIsotonicDesalinationDanger || !isAchievable
+        ? "alert-box red"
+        : "alert-box green";
+
+    box.innerHTML = `
+      <div class="alert-title">
+        <span>💧 所選點滴：${sf.label}（有效 Na+K = ${sf.totalConcMeqL.toFixed(1)} mEq/L）</span>
+        <span class="step-badge">${tbwResult.description}</span>
+      </div>
+      ${
+        tbwResult.usedFallback
+          ? `<p style="margin:0 0 6px; font-size:0.82rem; color:var(--amber);">ℹ️ ${tbwResult.fallbackReason}</p>`
+          : ""
+      }
+      <div class="kpi-row">
+        <div class="kpi-card">
+          <div class="kpi-label">每輸注 1 公升點滴之血鈉變化</div>
+          <div class="kpi-val">${sf.deltaNaPer1L >= 0 ? "+" : ""}${sf.deltaNaPer1L.toFixed(2)} mEq/L</div>
+          <div class="kpi-sub">公式：(Infusate Na+K − Serum Na) / (TBW + 1)</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">目標小時變化率</div>
+          <div class="kpi-val">${plan.hourlyGoalMeqL >= 0 ? "+" : ""}${plan.hourlyGoalMeqL.toFixed(2)} mEq/L/h</div>
+          <div class="kpi-sub">${plan.timeHours} 小時共變化 ${plan.targetDeltaNaMeqL >= 0 ? "+" : ""}${plan.targetDeltaNaMeqL.toFixed(1)} mEq/L</div>
+        </div>
+        <div class="kpi-card" style="border-color:var(--teal); border-width:2px;">
+          <div class="kpi-label">建議起始點滴流速 (Infusion Rate)</div>
+          <div class="kpi-val" style="color:${isAchievable ? "var(--teal-dark)" : "var(--red)"}; font-size:1.3rem;">
+            ${isAchievable ? `${sf.rateMlPerHour.toFixed(1)} mL/h` : "不可達／方向相反"}
+          </div>
+          <div class="kpi-sub">${isAchievable ? `${plan.timeHours}h 預計總輸注量：${sf.totalVolumeMl.toFixed(0)} mL` : sf.statusMessage}</div>
+        </div>
+      </div>
+      <ul class="cat-list" style="margin-top:10px;">
+        ${plan.warnings.map((w) => `<li>${w}</li>`).join("")}
+      </ul>
+    `;
+
+    tbody.innerHTML = plan.allFluidsTable
+      .map((f) => {
+        const isSel = f.key === sf.key;
+        const rateStr =
+          f.rateMlPerHour !== null
+            ? `<b>${f.rateMlPerHour.toFixed(1)} mL/h</b> (共 ${f.totalVolumeMl.toFixed(0)} mL)`
+            : `<span style="color:var(--red); font-weight:700;">${f.statusMessage}</span>`;
+        const noteStr = f.isIsotonicDesalinationDanger
+          ? `<span style="color:var(--red); font-weight:700;">🚨 SIADH/高張尿有脫鹽惡化風險！</span>`
+          : f.note;
+        return `
+          <tr class="${isSel ? "selected-row" : ""} ${f.isIsotonicDesalinationDanger ? "danger-row" : ""}">
+            <td>${f.label}</td>
+            <td>${f.totalConcMeqL.toFixed(1)} mEq/L</td>
+            <td>${f.deltaNaPer1L >= 0 ? "+" : ""}${f.deltaNaPer1L.toFixed(2)} mEq/L / L</td>
+            <td>${rateStr}</td>
+            <td>${noteStr}</td>
+          </tr>
+        `;
+      })
+      .join("");
+  }
+
+  function renderRescueResult(rescue) {
+    const box = $("rescue-result-box");
+    if (!rescue.isValid) {
+      box.innerHTML = `<div style="font-size:0.86rem; font-weight:600;">💡 輸入上方「過度矯正後目前血鈉」與「希望重新降回之目標血鈉」（需同時填妥 Step 1 體重），即可計算 D5W 自由水救援量與 DDAVP 處置步驟。（${rescue.error}）</div>`;
+      return;
+    }
+
+    box.innerHTML = `
+      <div class="alert-title">
+        <span>🛟 過度矯正降鈉救援試算：從 ${rescue.currentNa} mEq/L 溫和降回 ${rescue.targetRelowerNa} mEq/L（目標調降 −${rescue.desiredDropMeqL.toFixed(1)} mEq/L）</span>
+      </div>
+      <div class="kpi-row">
+        <div class="kpi-card">
+          <div class="kpi-label">封閉單室自由水估算 (D5W 總需求量)</div>
+          <div class="kpi-val">${rescue.closedCompartmentVolumeMl.toFixed(0)} mL</div>
+          <div class="kpi-sub">公式：TBW × (Na_cur / Na_target − 1)</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Adrogué-Madias D5W 對照估算量</div>
+          <div class="kpi-val">${rescue.adrogueMadiasVolumeMl.toFixed(0)} mL</div>
+          <div class="kpi-sub">每 1L D5W 約降 ${Math.abs(rescue.deltaNaPer1LD5w).toFixed(2)} mEq/L</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">ESE 2014 / SALSA 起始經驗劑量</div>
+          <div class="kpi-val">${rescue.salsaBolus10MlKg ? `${rescue.salsaBolus10MlKg.toFixed(0)} mL over 1h` : "10 mL/kg over 1h"}</div>
+          <div class="kpi-sub">US 2013 替代方案：D5W ${rescue.usInfusion3MlKgHr ? `${rescue.usInfusion3MlKgHr.toFixed(0)} mL/h` : "3 mL/kg/h"} q1–2h 測 Na</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Desmopressin (DDAVP) 煞車劑量</div>
+          <div class="kpi-val">2 μg IV / SC</div>
+          <div class="kpi-sub">阻斷持續水利尿（q6–8h 視尿量評估）</div>
+        </div>
+      </div>
+      <div style="margin-top:8px; font-size:0.84rem;">
+        <b>${rescue.ddavpGuidance.contraindicationWarning}</b>
+        <ul class="cat-list" style="margin-top:4px;">
+          ${rescue.ddavpGuidance.monitoringSteps.map((s) => `<li>${s}</li>`).join("")}
+        </ul>
+      </div>
+    `;
+  }
+
+  function updateBottomBar(step1, step2, step34, infusionPlan, committed) {
+    const statusEl = $("bottom-live-status");
+    if (!Number.isFinite(step1.serumNa)) {
+      statusEl.textContent = "請輸入實測血鈉 (Serum Na) 與臨床症狀開始評估（共用電腦無痕模式）";
+      return;
+    }
+
+    const parts = [`Na ${step1.serumNa}`];
+    if (step1.isEmergencyBolusIndicated) {
+      parts.push(`🚨 ${step1.effectiveSeverity === "severe" ? "嚴重症狀" : "中度症狀"} (建議 3% NaCl Bolus)`);
+    }
+    parts.push(`24h 上限 ≤${step1.limits.hardLimit24h} (剩餘目標 +${step1.remainingRecommendedTarget24h.toFixed(1)})`);
+    if (step34.primaryCategory) {
+      parts.push(`${step34.primaryCategory.code}`);
+    }
+    if (infusionPlan.isValid && infusionPlan.selectedFluid?.rateMlPerHour !== null) {
+      parts.push(`${infusionPlan.selectedFluid.shortLabel} ${infusionPlan.selectedFluid.rateMlPerHour.toFixed(1)} mL/h`);
+    }
+    statusEl.textContent = parts.join("｜");
+  }
+
+  // 清除重填按鈕
+  function clearAllInputs() {
+    sessionStore.clearAll();
+    document.querySelectorAll('input[type="number"]').forEach((input) => {
+      if (input.id === "age-years") input.value = "55";
+      else if (input.id === "mix-bag-vol" || input.id === "mix-b-bag-vol") input.value = "500";
+      else if (input.id === "mix-withdraw-ml") input.value = "100";
+      else if (input.id === "mix-amp-count") input.value = "6";
+      else if (input.id === "mix-b-target-pct") input.value = "3.0";
+      else if (input.id === "added-k-meql") input.value = "0";
+      else if (input.id === "target-delta-na") input.value = "5";
+      else if (input.id === "infusion-hours") input.value = "24";
+      else input.value = "";
+    });
+    document.querySelectorAll('input[type="checkbox"]').forEach((cb) => {
+      cb.checked = cb.id === "include-bolus-quota";
+    });
+    document.querySelector('input[name="symptom-severity"][value="mild_none"]').checked = true;
+    document.querySelector('input[name="volume-status"][value="equivocal"]').checked = true;
+    document.querySelector('input[name="mix-mode"][value="mode_a_ampoules"]').checked = true;
+    $("bolus-regimen").value = "ese_2014";
+    $("onset-time").value = "chronic_or_unknown";
+    $("limit-guideline").value = "us_cjasn";
+    $("infusate-select").value = "hypertonic_3";
+    copyBtn.textContent = "📋 複製臨床評估摘要 (EMR Note)";
+    onAnyInputChanged();
+  }
+
+  $("btn-clear-top").addEventListener("click", clearAllInputs);
+  $("btn-clear-bottom").addEventListener("click", clearAllInputs);
+
+  $("btn-reset-mix").addEventListener("click", () => {
+    document.querySelector('input[name="mix-mode"][value="mode_a_ampoules"]').checked = true;
+    $("mix-base-pct").value = "0.9";
+    $("mix-bag-vol").value = "500";
+    $("mix-withdraw-ml").value = "100";
+    $("mix-amp-count").value = "6";
+    onAnyInputChanged();
+  });
+
+  $("btn-sync-quota").addEventListener("click", () => {
+    const state = sessionStore.getState();
+    const rem = state.lastResult?.step1?.remainingRecommendedTarget24h;
+    const remHrs = state.lastResult?.step1?.remainingWindowHours;
+    if (Number.isFinite(rem)) {
+      $("target-delta-na").value = rem.toFixed(1);
+    }
+    if (Number.isFinite(remHrs)) {
+      $("infusion-hours").value = String(remHrs);
+    }
+    onAnyInputChanged();
+  });
+
+  // 範例情境快速載入
+  const PRESETS = {
+    severe_seizure: () => {
+      clearAllInputs();
+      $("serum-na").value = "110";
+      $("weight-kg").value = "65";
+      $("sex").value = "male";
+      $("age-years").value = "52";
+      document.querySelector('input[name="symptom-severity"][value="severe"]').checked = true;
+      document.querySelector('.sym-severe-cb[value="抽搐 (Seizure)"]').checked = true;
+      $("measured-osm").value = "232";
+      $("glucose-mgdl").value = "108";
+      $("bun-mgdl").value = "14";
+      $("urine-osm").value = "520";
+      $("urine-na").value = "68";
+      $("urine-k").value = "42";
+      document.querySelector('input[name="volume-status"][value="euvolemic"]').checked = true;
+      onAnyInputChanged();
+    },
+    siadh_desal: () => {
+      clearAllInputs();
+      $("serum-na").value = "118";
+      $("weight-kg").value = "58";
+      $("sex").value = "female";
+      $("age-years").value = "68";
+      $("measured-osm").value = "246";
+      $("glucose-mgdl").value = "96";
+      $("bun-mgdl").value = "12";
+      $("urine-osm").value = "580";
+      $("urine-na").value = "115";
+      $("urine-k").value = "55";
+      $("serum-ua").value = "2.8";
+      document.querySelector('input[name="volume-status"][value="euvolemic"]').checked = true;
+      $("infusate-select").value = "ns_09";
+      onAnyInputChanged();
+    },
+    azotemia_trap: () => {
+      clearAllInputs();
+      $("serum-na").value = "118";
+      $("weight-kg").value = "70";
+      $("sex").value = "male";
+      $("age-years").value = "64";
+      $("measured-osm").value = "292";
+      $("glucose-mgdl").value = "108";
+      $("bun-mgdl").value = "126";
+      $("urine-osm").value = "360";
+      $("urine-na").value = "18";
+      document.querySelector('input[name="volume-status"][value="hypovolemic"]').checked = true;
+      onAnyInputChanged();
+    },
+    hypovol_vomit: () => {
+      clearAllInputs();
+      $("serum-na").value = "116";
+      $("weight-kg").value = "54";
+      $("sex").value = "female";
+      $("age-years").value = "45";
+      $("serum-k").value = "2.9";
+      $("measured-osm").value = "242";
+      $("glucose-mgdl").value = "90";
+      $("bun-mgdl").value = "28";
+      $("urine-osm").value = "480";
+      $("urine-na").value = "46";
+      $("urine-k").value = "35";
+      $("urine-cl").value = "11";
+      $("conf-vomiting").checked = true;
+      document.querySelector('input[name="volume-status"][value="hypovolemic"]').checked = true;
+      $("fe-details").open = true;
+      $("infusate-select").value = "ns_09";
+      $("added-k-meql").value = "20";
+      onAnyInputChanged();
+    },
+  };
+
+  document.querySelectorAll("[data-preset]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const fn = PRESETS[btn.dataset.preset];
+      if (fn) fn();
+    });
+  });
+
+  // 複製病歷摘要按鈕
+  copyBtn.addEventListener("click", async () => {
+    const state = sessionStore.getState();
+    if (state.isStale || !state.copyableSummary) {
+      recalculateAll();
+    }
+    const freshSummary = sessionStore.getState().copyableSummary;
+    if (!freshSummary) return;
+
+    try {
+      await navigator.clipboard.writeText(freshSummary);
+      copyBtn.textContent = "✅ 已複製最新摘要 (修改輸入即自動失效)";
+      setTimeout(() => {
+        if (!sessionStore.getState().isStale) {
+          copyBtn.textContent = "📋 複製臨床評估摘要 (EMR Note)";
+        }
+      }, 2200);
+    } catch {
+      copyBtn.textContent = "⚠️ 瀏覽器阻擋自動複製，請手動複製";
+    }
+  });
+
+  // 綁定所有輸入與選擇器事件
+  document.querySelectorAll("input, select").forEach((el) => {
+    el.addEventListener("input", onAnyInputChanged);
+    el.addEventListener("change", onAnyInputChanged);
+  });
+
+  // Lightbox 放大圖片互動
+  const lightbox = $("lightbox");
+  const lightboxImg = $("lightbox-img");
+  const lightboxCap = $("lightbox-caption");
+
+  document.querySelectorAll(".fig-card img").forEach((img) => {
+    img.addEventListener("click", () => {
+      lightboxImg.src = img.src;
+      lightboxImg.alt = img.alt;
+      lightboxCap.textContent = img.dataset.lightboxTitle || img.alt;
+      lightbox.hidden = false;
+    });
+  });
+
+  $("lightbox-close").addEventListener("click", () => {
+    lightbox.hidden = true;
+  });
+  lightbox.addEventListener("click", (e) => {
+    if (e.target === lightbox) lightbox.hidden = true;
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !lightbox.hidden) {
+      lightbox.hidden = true;
+    }
+  });
+
+  // 初始執行一次渲染
+  recalculateAll();
+</script>
+</body>
+</html>

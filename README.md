@@ -13,6 +13,8 @@
 
 ## 使用方式
 
+頁面預設為 **⚡ 急診快速模式**：只顯示血鈉、體重、性別年齡、症狀、ODS 風險與 3% NaCl 劑量／速率／過度矯正救援。滲透壓與尿液鑑別診斷（Step 2–4）、Bolus 方案與上限指引切換、Watson TBW、其他點滴與泡製模式 B，請切換 **🔬 完整模式**。兩種模式的計算完全相同；快速模式下若隱藏欄位已有填值，頂端會提示這些值仍會納入計算。
+
 1. **Step 1 急症分流與矯正目標**：勾選神經學症狀等級（嚴重 vs 中度嚴重 vs 無/輕微）、選擇具名 3% NaCl Bolus 方案（ESE 2014 / US 2013 / SALSA 2021）、檢核主要 ODS 風險因子，並可輸入過去 24h 已上升之血鈉幅度以自動扣除剩餘安全配額。
 2. **Step 2 滲透壓與有效張力**：輸入 `Serum Na`、`Measured Serum Osm`、`Glucose`、`BUN`（選填 `Ethanol`），自動區分「實測血鈉計算滲透壓」、「有效張力 ($2\text{Na} + \text{Glc}/18$)」、「Katz/Hillier 高血糖校正血鈉」與「滲透壓間隙 (Osmolal Gap)」，避免將高 BUN／乙醇之真性低張性低血鈉誤判為高張性。
 3. **Step 3 & Step 4 尿液指標與 6 大分類**：輸入 `Urine Osm`、`Urine Na`、`Urine K` 與體液狀態（支援 `Equivocal` 不確定時並列候選比較，及 $U_{\text{Na}}$ `30` vs `20` 切點切換與 `20–30` 灰區提示），選填計算 $\text{FE}_{\text{Urea}}$（支援 BUN/UUN 與 Urine Urea 除以 2.14 單位轉換）、$\text{FE}_{\text{UA}}$、$U_{\text{Cl}}$，並在互動式流程圖即時高亮顯示當前路徑。

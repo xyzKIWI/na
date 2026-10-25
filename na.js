@@ -931,7 +931,7 @@ export const HYPOTONIC_CATEGORIES = {
       "1. 排除腎上腺功能不全：務必檢驗 Morning Cortisol / ACTH（糖皮質激素缺乏表現與 SIADH 完全相同，但需補充類固醇而非僅限水！）",
       "2. 排除甲狀腺功能低下：檢驗 TSH、Free T4",
       "3. 排除腎功能不全 (eGFR) 與利尿劑使用（特別是隱藏或近期使用之 Thiazides）",
-      "4. 排除亞臨床低血容（若體液狀態不確定，可參考血清尿酸 S_UA < 4 mg/dL、FE_Uric Acid > 11–12%、FE_Urea > 50% 支持 SIADH）",
+      "4. 排除亞臨床低血容（若體液狀態不確定，可參考血清尿酸 S_UA < 4 mg/dL、FE_Uric Acid > 11–12%、FE_Urea > 55% 支持 SIADH）",
     ],
     usualManagement: [
       "第一線：限制水分攝取 (Fluid restriction，通常 500–1000 mL/day 或低於每日尿量 500 mL) ＋ 停用致病藥物／治療內分泌病因",
@@ -1102,12 +1102,12 @@ export function evaluateStep3And4UrineAndClassification({
     if (feUrea < 35) {
       feUreaInterpretation =
         "FE_Urea < 35%：支持有效動脈血容積不足／腎前性低灌流（如脫水、心衰、肝硬化），即使使用利尿劑致 U_Na 假性偏高亦具參考價值。（註：屬輔助證據，請結合臨床）";
-    } else if (feUrea > 50) {
+    } else if (feUrea > 55) {
       feUreaInterpretation =
-        "FE_Urea > 50%：支持正常血容積（如 SIADH）或腎性鹽分流失。（註：屬輔助證據，不可單憑此數值確診 SIADH）";
+        "FE_Urea > 55%：支持正常血容積（如 SIADH）或腎性鹽分流失。（註：屬輔助證據，不可單憑此數值確診 SIADH）";
     } else {
       feUreaInterpretation =
-        "FE_Urea 35–50%：介於交界區，請結合臨床體液評估、FE_UA 與病史綜合判斷。";
+        "FE_Urea 35–55%：介於交界區，請結合臨床體液評估、FE_UA 與病史綜合判斷。";
     }
   }
 
@@ -1634,6 +1634,32 @@ export function calculateOvercorrectionRescue({
         "4. 一旦血鈉安全降回 24h 目標上限以內，即調降或停止快速 D5W 灌注，改依尿量等量補充維持血鈉穩定。",
       ],
     },
+  };
+}
+
+/**
+ * 鈉缺失量 (MDCalc #95 Sodium Deficit in Hyponatremia)
+ * 鈉缺失量 (mEq) = TBW × (目標 Na − 實測 Na)；換算點滴體積 (mL) = 缺失量 ÷ 點滴濃度 × 1000
+ * 注意：未計入點滴本身帶入的水分，所需體積會比 Adrogué-Madias 公式少，僅供對照
+ */
+export function calculateSodiumDeficit({ tbwL, serumNa, targetNa, infusateMeqL = 513.3 }) {
+  if (
+    !Number.isFinite(tbwL) ||
+    tbwL <= 0 ||
+    !Number.isFinite(serumNa) ||
+    serumNa <= 0 ||
+    !Number.isFinite(targetNa) ||
+    targetNa <= serumNa ||
+    !Number.isFinite(infusateMeqL) ||
+    infusateMeqL <= 0
+  ) {
+    return null;
+  }
+  const deficitMeq = tbwL * (targetNa - serumNa);
+  return {
+    deficitMeq,
+    infusateMeqL,
+    infusateVolumeMl: (deficitMeq / infusateMeqL) * 1000,
   };
 }
 

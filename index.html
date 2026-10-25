@@ -191,6 +191,60 @@
     border-color: var(--red);
   }
 
+  /* 急診快速模式：隱藏進階欄位（數值仍保留並納入計算） */
+  body.quick-mode [data-advanced] { display: none !important; }
+  body:not(.quick-mode) [data-quick-only] { display: none !important; }
+  .mode-switch {
+    display: inline-flex;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    overflow: hidden;
+    background: var(--paper);
+  }
+  .mode-btn {
+    border: 0;
+    background: transparent;
+    color: var(--body);
+    padding: 7px 12px;
+    font-size: 0.84rem;
+    font-weight: 700;
+    cursor: pointer;
+    min-height: 36px;
+  }
+  .mode-btn[aria-pressed="true"] {
+    background: var(--navy);
+    color: #fff;
+  }
+  .quick-intro {
+    margin: 0 0 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: var(--teal-l);
+    font-size: 0.86rem;
+    line-height: 1.55;
+  }
+  .advanced-notice {
+    margin-top: 6px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid #f59e0b;
+    background: #fffbeb;
+    color: #92400e;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+  .link-btn {
+    border: 0;
+    background: none;
+    padding: 0;
+    color: var(--navy);
+    font: inherit;
+    font-weight: 700;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
   /* 卡片與區塊 */
   .step-card {
     background: var(--paper);
@@ -756,7 +810,7 @@
   }
 </style>
 </head>
-<body>
+<body class="quick-mode">
 
 <header class="hero">
   <div class="hero-inner">
@@ -776,22 +830,32 @@
   <!-- 黏性導覽與情境預設 -->
   <nav class="sticky-nav" aria-label="步驟快速跳轉與範例載入">
     <div class="nav-row">
+      <div class="mode-switch" role="group" aria-label="顯示模式">
+        <button type="button" class="mode-btn" id="mode-quick" aria-pressed="true">⚡ 急診快速模式</button>
+        <button type="button" class="mode-btn" id="mode-full" aria-pressed="false">🔬 完整模式（含診斷 Step 2–4）</button>
+      </div>
       <div class="step-links">
         <a class="step-jump" href="#step1">Step 1 急症與上限</a>
-        <a class="step-jump" href="#step2">Step 2 滲透壓/張力</a>
-        <a class="step-jump" href="#step34">Step 3–4 尿液與 6 分類</a>
+        <a class="step-jump" href="#step2" data-advanced>Step 2 滲透壓/張力</a>
+        <a class="step-jump" href="#step34" data-advanced>Step 3–4 尿液與 6 分類</a>
         <a class="step-jump" href="#step5">Step 5 泡製/速率/救援</a>
-        <a class="step-jump" href="#refs">流程圖與文獻</a>
+        <a class="step-jump" href="#refs" data-advanced>流程圖與文獻</a>
       </div>
       <div class="preset-bar">
         <button type="button" class="btn-sm" data-preset="severe_seizure">範例：嚴重抽搐 (Na 110)</button>
-        <button type="button" class="btn-sm" data-preset="siadh_desal">範例：SIADH 高張尿</button>
-        <button type="button" class="btn-sm" data-preset="azotemia_trap">範例：高 BUN 陷阱</button>
-        <button type="button" class="btn-sm" data-preset="hypovol_vomit">範例：嘔吐低血容</button>
+        <button type="button" class="btn-sm" data-preset="siadh_desal" data-advanced>範例：SIADH 高張尿</button>
+        <button type="button" class="btn-sm" data-preset="azotemia_trap" data-advanced>範例：高 BUN 陷阱</button>
+        <button type="button" class="btn-sm" data-preset="hypovol_vomit" data-advanced>範例：嘔吐低血容</button>
         <button type="button" class="btn-sm btn-clear" id="btn-clear-top">清除重填</button>
       </div>
     </div>
+    <div class="advanced-notice" id="advanced-notice" hidden></div>
   </nav>
+
+  <p class="quick-intro" data-quick-only>
+    ⚡ <b>急診快速模式</b>：只顯示第一時間需要的欄位——血鈉、體重、性別年齡、症狀、ODS 風險，以及 3% NaCl 劑量、速率與過度矯正救援。
+    滲透壓與尿液鑑別診斷（Step 2–4）、Bolus 方案與上限指引切換、Watson TBW、其他點滴與泡製模式 B，請按上方「🔬 完整模式」。計算公式與兩種模式完全相同。
+  </p>
 
   <!-- ==================== STEP 1 ==================== -->
   <section class="step-card" id="step1">
@@ -837,7 +901,7 @@
         <span class="hint">≥ 65 歲自動調整 MDCalc #480 TBW 係數</span>
       </div>
 
-      <div class="field">
+      <div class="field" data-advanced="身高 (Watson TBW)">
         <label for="height-cm">身高 (Height) <small>選填，供 Watson TBW</small></label>
         <div class="input-wrap">
           <input id="height-cm" type="number" min="100" max="230" step="1" inputmode="decimal" placeholder="選填 (cm)" autocomplete="off">
@@ -880,7 +944,7 @@
 
     <!-- 具名急症 Bolus 方案選擇與發作時間 -->
     <div class="grid-3" style="margin-top: 10px;">
-      <div class="field">
+      <div class="field" data-advanced="Bolus 方案">
         <label for="bolus-regimen">1B. 具名 3% NaCl 急症 Bolus 方案</label>
         <select id="bolus-regimen">
           <option value="ese_2014">歐洲指引方案 (ESE 2014)：150 mL over 20 min</option>
@@ -897,7 +961,7 @@
         </select>
       </div>
 
-      <div class="field">
+      <div class="field" data-advanced="上限指引">
         <label for="limit-guideline">慢性安全上限基準</label>
         <select id="limit-guideline">
           <option value="us_cjasn" selected>US 2013 / CJASN 2024 (一般目標 6–8/上限 10；高風險目標 4–6/上限 8)</option>
@@ -920,8 +984,8 @@
         <label class="check-pill ods-pill"><input type="checkbox" id="ods-alcohol"><span><b>[主要]</b> 慢性酒精使用疾患 (Alcoholism)</span></label>
         <label class="check-pill ods-pill"><input type="checkbox" id="ods-malnutrition"><span><b>[主要]</b> 營養不良／惡病質 (Malnutrition)</span></label>
         <label class="check-pill ods-pill"><input type="checkbox" id="ods-liver"><span><b>[主要]</b> 晚期肝病／肝硬化 (Advanced liver disease)</span></label>
-        <label class="check-pill"><input type="checkbox" id="ods-sec-thiazide"><span>[次要留意] 老年女性／Thiazide 使用（易快速水利尿）</span></label>
-        <label class="check-pill"><input type="checkbox" id="ods-sec-polydipsia"><span>[次要留意] 低溶質攝取／多飲症（給溶質後極易暴衝過矯）</span></label>
+        <label class="check-pill" data-advanced="次要 ODS 因子"><input type="checkbox" id="ods-sec-thiazide"><span>[次要留意] 老年女性／Thiazide 使用（易快速水利尿）</span></label>
+        <label class="check-pill" data-advanced="次要 ODS 因子"><input type="checkbox" id="ods-sec-polydipsia"><span>[次要留意] 低溶質攝取／多飲症（給溶質後極易暴衝過矯）</span></label>
       </div>
     </div>
 
@@ -970,7 +1034,7 @@
   </section>
 
   <!-- ==================== STEP 2 ==================== -->
-  <section class="step-card" id="step2">
+  <section class="step-card" id="step2" data-advanced="Step 2 滲透壓">
     <div class="step-header">
       <div class="step-title-group">
         <span class="step-num">STEP 2</span>
@@ -1030,7 +1094,7 @@
   </section>
 
   <!-- ==================== STEP 3 & STEP 4 ==================== -->
-  <section class="step-card" id="step34">
+  <section class="step-card" id="step34" data-advanced="Step 3–4 尿液">
     <div class="step-header">
       <div class="step-title-group">
         <span class="step-num">STEP 3 &amp; 4</span>
@@ -1250,10 +1314,10 @@
     <div style="background:#f8fafc; border:1.5px solid var(--line); border-radius:12px; padding:15px; margin-bottom:16px;">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
         <h3 style="margin:0; font-size:1.03rem; color:var(--navy);">🧪 5A. 3% NaCl 高張鹽水床邊泡製換算器（以 0.9% NaCl ＋ 10% NaCl 20 mL/amp 調配）</h3>
-        <button type="button" class="btn-sm" id="btn-reset-mix">重設為標準 6 支快泡法 (3.00%)</button>
+        <button type="button" class="btn-sm" id="btn-reset-mix" data-advanced>重設為標準 6 支快泡法 (3.00%)</button>
       </div>
 
-      <div class="segmented" style="margin-bottom: 12px;">
+      <div class="segmented" style="margin-bottom: 12px;" data-advanced="泡製模式">
         <label class="seg-item">
           <input type="radio" name="mix-mode" value="mode_a_ampoules" checked>
           <span>模式 A：整支安瓿快泡法（推薦：500 mL 抽 100 mL ＋ 加 6 支 ＝ 520 mL 之 3.00% NaCl）</span>
@@ -1264,7 +1328,7 @@
         </label>
       </div>
 
-      <div class="grid-4" id="mix-mode-a-inputs">
+      <div class="grid-4" id="mix-mode-a-inputs" data-advanced="泡製配方">
         <div class="field" style="margin-bottom:0;">
           <label for="mix-base-pct">基底點滴袋種類</label>
           <select id="mix-base-pct">
@@ -1296,7 +1360,7 @@
         </div>
       </div>
 
-      <div class="grid-3" id="mix-mode-b-inputs" hidden>
+      <div class="grid-3" id="mix-mode-b-inputs" hidden data-advanced="泡製配方">
         <div class="field" style="margin-bottom:0;">
           <label for="mix-b-base-pct">基底點滴袋種類</label>
           <select id="mix-b-base-pct">
@@ -1332,7 +1396,7 @@
       </div>
 
       <div class="grid-4">
-        <div class="field">
+        <div class="field" data-advanced="TBW 公式">
           <label for="tbw-method">總體液量 (TBW) 估算公式</label>
           <select id="tbw-method">
             <option value="fraction" selected>MDCalc #480 體重係數法 (男0.6/0.5；女0.5/0.45)</option>
@@ -1384,7 +1448,7 @@
 
       <div id="infusion-result-box" class="alert-box green"></div>
 
-      <details style="margin-top:10px;">
+      <details style="margin-top:10px;" data-advanced>
         <summary>📊 展開全品項點滴每公升升／降鈉幅度 (ΔNa/1L) 與所需流速總覽表</summary>
         <div class="details-body" style="padding:0;">
           <div class="table-scroll" style="margin:0; border:0;">
@@ -1434,7 +1498,7 @@
   </section>
 
   <!-- ==================== 原始流程圖與實證文獻 ==================== -->
-  <section class="step-card" id="refs">
+  <section class="step-card" id="refs" data-advanced>
     <div class="step-header">
       <div class="step-title-group">
         <span class="step-num">FIGURES &amp; REFS</span>
@@ -1592,7 +1656,65 @@
     $("mix-mode-b-inputs").hidden = mixMode !== "mode_b_isovolumetric";
 
     recalculateAll();
+    syncInfusateOptions();
+    updateAdvancedNotice();
   }
+
+  // 急診快速模式：只隱藏進階欄位與少用點滴，計算邏輯與數值不變
+  const QUICK_INFUSATES = new Set(["hypertonic_3", "custom_mix", "ns_09", "d5w"]);
+
+  function setDisplayMode(mode) {
+    const quick = mode === "quick";
+    document.body.classList.toggle("quick-mode", quick);
+    $("mode-quick").setAttribute("aria-pressed", String(quick));
+    $("mode-full").setAttribute("aria-pressed", String(!quick));
+    syncInfusateOptions();
+    updateAdvancedNotice();
+  }
+
+  function syncInfusateOptions() {
+    const quick = document.body.classList.contains("quick-mode");
+    const select = $("infusate-select");
+    for (const option of select.options) {
+      // 已選取的點滴即使不在常用清單也保留，避免畫面與計算不一致
+      const hide = quick && !QUICK_INFUSATES.has(option.value) && option.value !== select.value;
+      option.hidden = hide;
+      option.disabled = hide;
+    }
+  }
+
+  // 快速模式下若隱藏欄位已有非預設值，提示這些值仍會納入計算
+  function updateAdvancedNotice() {
+    const notice = $("advanced-notice");
+    const quick = document.body.classList.contains("quick-mode");
+    const filled = new Set();
+    if (quick) {
+      document.querySelectorAll("[data-advanced]").forEach((container) => {
+        const name = container.dataset.advanced;
+        if (!name) return;
+        const changed = [...container.querySelectorAll("input, select")].some((el) => {
+          if (el.tagName === "SELECT") {
+            const def = [...el.options].find((o) => o.defaultSelected) || el.options[0];
+            return el.value !== def.value;
+          }
+          if (el.type === "checkbox" || el.type === "radio") return el.checked !== el.defaultChecked;
+          return el.value !== el.defaultValue;
+        });
+        if (changed) filled.add(name);
+      });
+    }
+    if (filled.size === 0) {
+      notice.hidden = true;
+      notice.textContent = "";
+      return;
+    }
+    notice.hidden = false;
+    notice.innerHTML = `⚠️ 隱藏的進階欄位已填寫，仍會納入計算：${[...filled].join("、")}。<button type="button" class="link-btn" id="notice-show-full">切換完整模式查看</button>`;
+    $("notice-show-full").addEventListener("click", () => setDisplayMode("full"));
+  }
+
+  $("mode-quick").addEventListener("click", () => setDisplayMode("quick"));
+  $("mode-full").addEventListener("click", () => setDisplayMode("full"));
 
   function recalculateAll() {
     const serumNa = parseOptionalNumber($("serum-na").value);
@@ -2524,6 +2646,7 @@
 
   // 初始執行一次渲染
   recalculateAll();
+  setDisplayMode("quick");
 </script>
 </body>
 </html>

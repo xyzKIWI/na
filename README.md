@@ -35,8 +35,11 @@
 ## 驗證
 
 ```powershell
-node --test .\na.test.mjs
+node --test .\na.test.mjs .\na.literature.test.mjs
 ```
+
+- `na.literature.test.mjs`：對照文獻範例（ESE 2014、Adrogué & Madias JASN 2012 等）的測試，與文獻不一致處以 `todo` 標記，詳見 [`TEST_REPORT.md`](./TEST_REPORT.md)
+- GitHub Actions 會在每次 push 與 PR 自動執行上述測試
 
 ## 更新方法
 

@@ -585,12 +585,13 @@ test("FE_Urea 與 FE_UA 為無因次比值：血尿同單位時 mmol/L 與 mg/dL
   close(si.feUa, mgdl.feUa, 1e-9);
 });
 
-test("FE_Urea 判讀分段：< 35、35–50、> 50；FE_UA：< 4、4–12、> 12（[FENSKE08] 12%）", () => {
+test("FE_Urea 判讀分段：< 35、35–55、> 55（[ESE2014] Table 6）；FE_UA：< 4、4–12、> 12（[FENSKE08] 12%）", () => {
   const fe = (urineUrea) => step34({ urineOsm: 400, urineNa: 40, feInputs: { serumCr: 1, urineCr: 100, serumUrea: 10, urineUrea } });
   assert.match(fe(349).feUreaInterpretation, /< 35%/);
-  assert.match(fe(350).feUreaInterpretation, /35–50%/);
-  assert.match(fe(500).feUreaInterpretation, /35–50%/);
-  assert.match(fe(501).feUreaInterpretation, /> 50%/);
+  assert.match(fe(350).feUreaInterpretation, /35–55%/);
+  assert.match(fe(540).feUreaInterpretation, /35–55%/);
+  assert.match(fe(551).feUreaInterpretation, /> 55%/);
+  // 恰為 55%（urineUrea 550）浮點運算得 55.00000000000001，故不測精確邊界
   const ua = (urineUa) => step34({ urineOsm: 400, urineNa: 40, feInputs: { serumCr: 1, urineCr: 100, serumUa: 1, urineUa } });
   assert.match(ua(3.9).feUaInterpretation, /< 4%/);
   assert.match(ua(12).feUaInterpretation, /4–12%/);

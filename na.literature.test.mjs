@@ -25,6 +25,8 @@ import {
 // [FENSKE08] Fenske W, et al. J Clin Endocrinol Metab 2008;93:2991–2997. doi:10.1210/jc.2008-0330
 // [WATSON80] Watson PE, et al. Am J Clin Nutr 1980;33:27–39.
 // [KATZ73]   Katz MA. N Engl J Med 1973;289:843–844.  [HILLIER99] Hillier TA, et al. Am J Med 1999;106:399–403.
+// [HOORN17]  Hoorn EJ, Zietse R. J Am Soc Nephrol 2017;28:1340–1349. doi:10.1681/ASN.2016101139（Table 2 美國／歐洲指引對照）
+// [SALSA-P]  Baek SH, et al. SALSA 試驗計畫書. Trials 2017. doi:10.1186/s13063-017-1865-z
 
 const close = (actual, expected, tolerance, message) =>
   assert.ok(
@@ -271,6 +273,39 @@ test("Step 1 上限與 [ESE2014] §7.1.2.4／§7.2.1.6 一致：首 24h ≤ 10�
   assert.equal(ese.limits.hardLimitSecond24h, 8);
   assert.equal(ese.limits.hardLimit48h, 18);
 });
+
+test("美國方案嚴重症狀 100 mL over 10 min、最多 3 次（[HOORN17] Table 2）", () => {
+  const us = BOLUS_REGIMENS.us_2013.severe;
+  assert.equal(us.fixedVolumeMl, 100);
+  assert.equal(us.infusionMinutes, 10);
+  assert.match(us.repeatRule, /最多共 3 次/);
+});
+
+test("美國高 ODS 風險：目標 4–6、上限 8 mmol/L/24h（[HOORN17] Table 2）", () => {
+  const r = evaluateStep1Triage({ serumNa: 120, limitGuideline: "us_cjasn", majorOdsFlags: { alcoholism: true } });
+  assert.equal(r.limits.targetMin24h, 4);
+  assert.equal(r.limits.targetMax24h, 6);
+  assert.equal(r.limits.hardLimit24h, 8);
+});
+
+test(
+  "[HOORN17] Table 2：美國一般風險最低矯正 4 mmol/L per d",
+  { todo: "工具一般風險目標下限為 6（6–8），文獻為 4–8（見 TEST_REPORT.md 不一致 #5）" },
+  () => {
+    assert.equal(evaluateStep1Triage({ serumNa: 120, limitGuideline: "us_cjasn" }).limits.targetMin24h, 4);
+  },
+);
+
+test(
+  "[SALSA-P] 嚴重症狀 4 mL/kg over 40 min；未知體重時中度 100 mL、嚴重 200 mL",
+  { todo: "工具 SALSA 嚴重症狀為 2 mL/kg over 20 min，未填體重一律 150 mL（見 TEST_REPORT.md 不一致 #4）" },
+  () => {
+    assert.equal(BOLUS_REGIMENS.salsa_2021.severe.weightBasedMlPerKg, 4);
+    assert.equal(BOLUS_REGIMENS.salsa_2021.severe.infusionMinutes, 40);
+    const noWeight = evaluateStep1Triage({ serumNa: 115, symptomSeverity: "severe", regimenKey: "salsa_2021", tbwL: 30 });
+    assert.equal(noWeight.activeRegimenBolus.bolusMl, 200);
+  },
+);
 
 test("Step 1 主要 ODS 風險因子（Na ≤ 105、K < 3.5、酒精、營養不良、肝病）切換為 24h 上限 8", () => {
   const atBoundary = evaluateStep1Triage({ serumNa: 105 });

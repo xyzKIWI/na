@@ -3,7 +3,7 @@
 - **測試日期**：2026-10-25
 - **測試對象**：`na.js`（commit `134b0fd`，10/25 邊界修正版）
 - **執行方式**：`node --test na.test.mjs na.literature.test.mjs`（Node 22；GitHub Actions 於每次 push 與 PR 自動執行）
-- **結果**：60 項測試，**56 通過、0 失敗、4 項 todo**（2 項與文獻不一致、2 項功能未實作）。不一致 #3（FE_Urea 切點）已於 PR #4 依臨床端決定改為 55% 並解決
+- **結果**：64 項測試，**58 通過、0 失敗、6 項 todo**（4 項與文獻不一致、2 項功能未實作）。不一致 #3（FE_Urea 切點）已於 PR #4 依臨床端決定改為 55% 並解決
 
 > 本 PR **沒有修改** `na.js`、`index.html` 或任何公式、閾值、速率上限與臨床文字。下面列出的問題都只是記錄，是否修改由臨床端判斷。唯一已修改的是不一致 #3，由臨床端決定後在 PR #4 處理。
 
@@ -12,7 +12,7 @@
 | 檔案 | 內容 |
 |---|---|
 | `na.test.mjs` | 原有 10 項測試（作者 10/24–10/25 撰寫），PR #4 另加 2 項（鈉缺失量、FE_Urea 55%） |
-| `na.literature.test.mjs` | 本次新增 48 項，每個數值範例都標註出處；與文獻不一致者以 `todo` 標記，不會讓 CI 變紅 |
+| `na.literature.test.mjs` | 本次新增 52 項，每個數值範例都標註出處；與文獻不一致者以 `todo` 標記，不會讓 CI 變紅 |
 | `.github/workflows/test.yml` | push／PR 時自動跑上述兩個檔案 |
 
 `na.js` 原本就是獨立 ES module（`index.html` 以 `import` 載入），所以不需要另外抽出計算邏輯，程式行為完全沒有變動。
@@ -27,8 +27,13 @@
 | FENSKE08 | Fenske W, et al. *J Clin Endocrinol Metab* 2008;93:2991–2997. [doi:10.1210/jc.2008-0330](https://doi.org/10.1210/jc.2008-0330) | 核對摘要（FE_UA 12%） |
 | WATSON80 | Watson PE, et al. *Am J Clin Nutr* 1980;33:27–39 | 公式係數（與 `references.md` 相同） |
 | KATZ73／HILLIER99 | Katz MA. *NEJM* 1973;289:843；Hillier TA, et al. *Am J Med* 1999;106:399 | 每 100 mg/dL 校正 1.6／2.4 |
+| HOORN17 | Hoorn EJ, Zietse R. Diagnosis and treatment of hyponatremia: compilation of the guidelines. *J Am Soc Nephrol* 2017;28:1340–1349. [doi:10.1681/ASN.2016101139](https://doi.org/10.1681/ASN.2016101139)（PMC5407738） | 核對全文 Table 2（美國 2013 與歐洲 2014 指引對照表）與正文 |
+| SALSA-P | Baek SH, et al. SALSA 試驗計畫書，*Trials* 2017. [doi:10.1186/s13063-017-1865-z](https://doi.org/10.1186/s13063-017-1865-z)（PMID 28356136，PMC5372334） | 核對 Rapid intermittent bolus 組劑量 |
+| SALSA21 | Baek SH, et al. *JAMA Intern Med* 2021;181(1):81–92. [doi:10.1001/jamainternmed.2020.5519](https://doi.org/10.1001/jamainternmed.2020.5519)（PMC7589081） | 核對 Methods 之 relowering 條件與劑量 |
 
 Adrogué & Madias *NEJM* 2000 原文沒有開放全文，無法逐字核對，所以 Adrogué–Madias 範例改用同作者 2012 年 JASN 綜論中可驗證的 Table 2 數值。
+
+美國 2013 專家共識（Verbalis JG, et al. *Am J Med* 2013）原文網站拒絕存取，改以 HOORN17 Table 2 的逐列對照作為美國指引數值的出處。
 
 ---
 
@@ -66,7 +71,9 @@ Adrogué & Madias *NEJM* 2000 原文沒有開放全文，無法逐字核對，�
 - **ESE 方案**：150 mL over 20 min、可改 2 mL/kg；中度症狀單次 150 mL。與 ESE2014 §7.1.1.1、§7.1 Advice、§7.2.1.4 一致。
 - **24h 上限**：首 24h ≤ 10、其後每 24h ≤ 8、48h 合計 18，與 ESE2014 §7.1.2.4、§7.2.1.6 一致。
 - **有限體積 Bolus**：與質量守恆 (TBW×S + V×C)/(TBW+V) 完全一致（3 組數據）。
-- **SALSA**：2 mL/kg 以四捨五入取整數 mL；未填體重時退回 150 mL。
+- **SALSA 中度症狀**：2 mL/kg over 20 min，與 SALSA-P 一致；以四捨五入取整數 mL。嚴重症狀與未填體重時的劑量與計畫書不同，見不一致 #4。
+- **美國方案嚴重症狀**：100 mL over 10 min、最多 3 次，與 HOORN17 Table 2「Bolus 3% NaCl (100 ml over 10 min × 3 as needed)」一致。
+- **美國高 ODS 風險**：目標 4–6、上限 8 mEq/L/24h，風險因子含低血鉀、酒精、營養不良、肝病，與 HOORN17 Table 2 及正文一致。
 - **主要 ODS 風險因子邊界**：Na 105／105.1、K 3.49／3.5，以及酒精、營養不良、肝病；高風險設定優先於指引選擇。
 - **24h 累計配額**：
   - 直接輸入的升幅優先於起始 Na。
@@ -76,7 +83,7 @@ Adrogué & Madias *NEJM* 2000 原文沒有開放全文，無法逐字核對，�
 
 ### 過度矯正救援
 
-- **起始劑量**：D5W 10 mL/kg over 1 h、DDAVP 2 μg，與 ESE2014 §7.5.1.3–7.5.1.4 一致。
+- **起始劑量**：D5W 10 mL/kg over 1 h、DDAVP 2 μg，與 ESE2014 §7.5.1.3–7.5.1.4 一致；SALSA21 Methods 的 relowering 也是「dextrose 5%, infusion of 10 mL/kg over 1 hour and/or intravenous desmopressin 2 µg」。
 - **公式**：封閉單室公式、Adrogué–Madias D5W 對照公式都已驗算。
 - **防呆**：目標 ≥ 目前值、缺 TBW、缺體重。
 
@@ -158,6 +165,30 @@ Adrogué & Madias *NEJM* 2000 原文沒有開放全文，無法逐字核對，�
 | 臨床影響 | FE_Urea 50–55% 的病人會被提示支持 SIADH，但 ESE 的補充準則要求 > 55%。這只是判讀文字，不影響 6 大分類或速率計算。 |
 | 測試 | 「FE_Urea 判讀分段」測試已改為驗證 55% 邊界 |
 
+### 不一致 #4：SALSA 方案嚴重症狀劑量與未填體重時的體積
+
+| | 內容 |
+|---|---|
+| 輸入 | 方案選 SALSA、嚴重症狀、體重 60 kg（以及未填體重） |
+| 文獻預期 | SALSA-P（Rapid intermittent bolus 組）："In the case of moderately severe symptoms, ... 2 mL/kg 3% hypertonic saline over 20 min (100 mL, 3% saline for unknown body weight)"；"In cases of severe symptoms, ... 4 mL/kg 3% hypertonic saline over 40 min (200 mL, 3% saline for unknown body weight)"。60 kg 嚴重症狀應為 240 mL over 40 min |
+| 工具實際 | 嚴重症狀標題為「3% NaCl 2 mL/kg IV Bolus over 20 min」，60 kg 算 120 mL；未填體重時不分輕重都退回 150 mL |
+| 出處 | SALSA-P（試驗計畫書）。JAMA 2021 正文沒有寫劑量細節，只寫 RIB 組 1 小時內平均累積 220.4 mL |
+| 臨床影響 | 選 SALSA 方案的嚴重症狀病人，工具建議量只有試驗計畫書的一半；未填體重時中度症狀多給、嚴重症狀少給。預設方案是 ESE，選 SALSA 才受影響 |
+| 測試 | 「[SALSA-P] 嚴重症狀 4 mL/kg over 40 min」標為 `todo` |
+
+### 不一致 #5：美國方案一般風險的 24h 目標下限
+
+| | 內容 |
+|---|---|
+| 輸入 | 上限指引選 US 2013、無高 ODS 風險 |
+| 文獻預期 | HOORN17 Table 2 美國指引："Minimum: 4–8 mmol/L per d, 4–6 mmol/L per d (high risk of ODS)"；"Limits: 10–12 mmol/L per d, 8 mmol/L per d (high risk of ODS)" |
+| 工具實際 | 一般風險目標 6–8（下限 6）、上限 10 |
+| 出處 | HOORN17 Table 2 |
+| 臨床影響 | 上限取 10–12 的下緣，比文獻保守，沒有安全疑慮。目標下限 6 比文獻的 4 高，可能讓使用者以為升 4–5 mEq/L 還「沒達標」 |
+| 測試 | 「[HOORN17] 美國一般風險最低矯正 4 mmol/L」標為 `todo`；高風險 4–6／8 測試通過 |
+
+另外，HOORN17 Table 2 把美國指引的中度症狀寫成「Continuous infusion 3% NaCl (0.5–2 ml/kg per h)」，沒有提到 Bolus；工具的美國中度症狀寫成「100 mL Bolus 或 0.5–2 mL/kg/h」。Verbalis 原文無法取得，所以「100 mL Bolus」這個選項找不到可核對的出處，列為待確認。
+
 ### 文獻之間本身就不一致（工具選了其中一種，記錄供參考）
 
 1. **U_Osm 100、U_Na 30 剛好落在分界上**：
@@ -183,7 +214,7 @@ Adrogué & Madias *NEJM* 2000 原文沒有開放全文，無法逐字核對，�
 | **老年切點 65 歲** | ESE2014 說「elderly」但沒有定義年齡。65 歲來自 MDCalc 慣例，找不到原始文獻定義。 |
 | **FE_Urea < 35% 支持腎前性** | 常見教學值，本次沒有取得可逐字核對的原始研究。 |
 | **FE_UA < 4%、S_UA < 4 mg/dL、U_Cl < 20** | 是常見教學切點，但本次沒有取得可逐字核對的原始文獻。 |
-| **K < 3.5 作為高 ODS 風險** | 美國 2013 共識只寫「hypokalemia」，3.5 是工具自己定的數值。 |
+| **K < 3.5 作為高 ODS 風險** | HOORN17 轉述美國指引只寫「hypokalemia」，3.5 是工具自己定的數值。 |
 | **乙醇係數 4.6 vs 3.7** | 工具的間隙計算用 4.6，另外計算 3.7 的值但沒有用在分支判斷。哪個係數較準，文獻有爭議（Purssell 2001 建議 3.7），本次沒有核對原文。 |
 | **Adrogué–Madias NEJM 2000 原文範例** | 沒有開放全文，改用同作者 JASN 2012 範例。 |
 

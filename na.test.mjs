@@ -518,3 +518,15 @@ test("calculateSodiumDeficit follows MDCalc #95: TBW × (target − current), co
   assert.equal(calculateSodiumDeficit({ tbwL: null, serumNa: 110, targetNa: 114 }), null);
   assert.equal(calculateSodiumDeficit({ tbwL: 30, serumNa: null, targetNa: 114 }), null);
 });
+
+test("FE_Urea interpretation uses the ESE 2014 Table 6 SIAD cutoff of > 55%", () => {
+  const fe = (urineUrea) =>
+    evaluateStep3And4UrineAndClassification({
+      urineOsm: 400,
+      urineNa: 40,
+      feInputs: { serumCr: 1, urineCr: 100, serumUrea: 10, urineUrea },
+    }).feUreaInterpretation;
+  assert.match(fe(500), /35–55%/); // FE_Urea 50%
+  assert.match(fe(560), /> 55%/); // FE_Urea 56%
+  assert.match(fe(349), /< 35%/);
+});

@@ -406,7 +406,7 @@ export function evaluateStep1Triage({
   const isEmergencyBolusIndicated =
     effectiveSeverity === "severe" || effectiveSeverity === "moderate";
 
-  // 2. 計算 100 mL、150 mL、2 mL/kg 三種 Bolus 體積與預期升幅（使用有限體積公式）
+  // 2. 計算 100 mL、150 mL、300 mL (2x150 / 3x100)、2 mL/kg Bolus 體積與預期升幅（皆使用有限體積公式）
   const bolus100 = calculateFiniteBolusDeltaNa({
     tbwL,
     serumNa,
@@ -417,6 +417,12 @@ export function evaluateStep1Triage({
     tbwL,
     serumNa,
     bolusMl: 150,
+    infusateNaPlusK: customBolusConcMeqL,
+  });
+  const bolus300 = calculateFiniteBolusDeltaNa({
+    tbwL,
+    serumNa,
+    bolusMl: 300,
     infusateNaPlusK: customBolusConcMeqL,
   });
   const weightBolusMl =
@@ -467,6 +473,19 @@ export function evaluateStep1Triage({
 
   const hasMajorOdsRisk = activeMajorOdsReasons.length > 0;
   const hasSecondaryOdsRisk = activeSecondaryOdsReasons.length > 0;
+
+  const onsetNote =
+    onset === "acute_lt_48h"
+      ? "⏱️ 已標記為「明確急性發作 (< 48h，如術後無張力輸液、馬拉松／MDMA 急性水中毒)」：急性腦水腫為主要致死威脅，有症狀時應立即給予 3% NaCl Bolus 快速拉升 4–6 mEq/L 緩解腦水腫。惟若發作時間有任何不確定，或合併上述主要 ODS 風險因子，仍須嚴格遵守下方 24h 安全上限（ESE 2014 對急慢性均採 ≤ 10 mmol/L/24h 上限）。"
+      : "⏱️ 慢性 (≥ 48h) 或發作時間不明（預設安全模式）：腦細胞已完成有機滲透壓物質排出之代償，過快升鈉將引發滲透壓去髓鞘症候群 (ODS)，必須嚴格控管 24h / 48h 升鈉上限。";
+
+  const isHyponatremia = Number.isFinite(serumNa) ? serumNa < 135 : null;
+  const nonHyponatremiaNote =
+    isHyponatremia === false
+      ? serumNa > 145
+        ? `ℹ️ 目前輸入實測血鈉為 ${serumNa} mEq/L (> 145 mEq/L)，屬於「高血鈉 (Hypernatremia)」而非低血鈉。若欲使用 Step 5B Adrogué-Madias 計算低張液降鈉速率，請將目標變化量設為負值（如 −6 mEq/L）。`
+        : `ℹ️ 目前輸入實測血鈉為 ${serumNa} mEq/L (135–145 mEq/L)，屬於正常血鈉範圍（非低血鈉 < 135 mEq/L）。`
+      : null;
 
   // 4. 明確數值化目標 (Target)、警示門檻 (Warning) 與絕對上限 (Hard Ceiling)
   let limits;
@@ -560,7 +579,7 @@ export function evaluateStep1Triage({
     overcorrectionAlert = `🚨 24h 累計已上升 ${priorRise24h.toFixed(1)} mEq/L，已超過絕對安全上限 (${limits.hardLimit24h} mEq/L)！請立即停止所有升鈉輸液，並使用 Step 5 過度矯正救援（D5W + Desmopressin）重新降回安全範圍。`;
   } else if (committedRise24h >= limits.hardLimit24h) {
     overcorrectionStatus = "reached_hard_limit";
-    overcorrectionAlert = `⚠️ 計入先前升幅与本波 Bolus 後已達 ${committedRise24h.toFixed(1)} mEq/L（觸及 24h 上限 ${limits.hardLimit24h} mEq/L）。本 24 小時內不應再追加主動升鈉！`;
+    overcorrectionAlert = `⚠️ 計入先前升幅與本波 Bolus 後已達 ${committedRise24h.toFixed(1)} mEq/L（觸及 24h 上限 ${limits.hardLimit24h} mEq/L）。本 24 小時內不應再追加主動升鈉！`;
   } else if (committedRise24h >= limits.warning24h) {
     overcorrectionStatus = "reached_warning_or_target";
     overcorrectionAlert = `⚠️ 24h 累計升幅已達 ${committedRise24h.toFixed(1)} mEq/L（已達目標／警示門檻 ${limits.warning24h} mEq/L）。建議暫停主動高張鹽水輸注，改為嚴密監測尿量與 q2–4h 血鈉，防止自發性水利尿造成超標。`;
@@ -574,10 +593,12 @@ export function evaluateStep1Triage({
 
   return {
     serumNa,
-    isHyponatremia: Number.isFinite(serumNa) ? serumNa < 135 : null,
+    isHyponatremia,
+    nonHyponatremiaNote,
     effectiveSeverity,
     isEmergencyBolusIndicated,
     onset,
+    onsetNote,
     regimen,
     activeStepProtocol:
       effectiveSeverity === "severe"
@@ -587,6 +608,7 @@ export function evaluateStep1Triage({
           : null,
     bolus100,
     bolus150,
+    bolus300,
     bolus2MlKg,
     activeRegimenBolus,
     hasMajorOdsRisk,
@@ -616,6 +638,8 @@ export function evaluateStep1Triage({
  * - 區分「總滲透壓 (含無效滲透壓物質 BUN/Ethanol)」與「有效滲透壓/張力 (Effective Osm = 2×Na + Glc/18)」
  * - 當 Measured Osm ≥ 280 (甚至 > 285)，但 Effective Osm < 280 且是由高 BUN 或 Ethanol 造成時，
  *   正確歸類為「真性低張性低血鈉合併無效滲透壓物質 (Azotemia / Ethanol)」，並導引進入 Step 3！
+ * - 當 Measured Osm 280–285 且使用 Indirect ISE 時，假性低血鈉因實測 Na 被低估，連帶使 Calculated Osm 被低估，
+ *   算術上必然產生視同 Osmolal Gap > 10，故須同時提示假性低血鈉 (改測 Direct ISE) 與外源溶質！
  */
 export function evaluateStep2Osmolality({
   serumNa = null,
@@ -685,22 +709,38 @@ export function evaluateStep2Osmolality({
       ? "目前已標註為 Direct ISE（如血氣機 ABG/VBG）：不受高血脂／高蛋白固體相體積影響；若仍低血鈉且滲透壓正常，應考慮等張無鈉灌洗液吸收（如 TURP 甘胺酸／山梨醇）或外源性溶質。"
       : "若為中央檢驗室傳統 Indirect ISE（稀釋法）：嚴重高三酸甘油酯血症或高蛋白血症（如多發性骨髓瘤）會造成假性低血鈉，建議改用血氣機 Direct ISE 重測確認。";
 
-  if (!hasMeasuredOsm) {
+  if (serumNa >= 135) {
+    branchId = "not_hyponatremia";
+    branchTitle =
+      serumNa > 145
+        ? `高血鈉 (Hypernatremia, Serum Na = ${serumNa} > 145 mEq/L)`
+        : `正常血鈉範圍 (Normal Serum Na = ${serumNa} mEq/L ≥ 135)`;
+    branchBadge = `Serum Na ${serumNa} mEq/L (非低血鈉)`;
+    clinicalSummary =
+      serumNa > 145
+        ? `實測血鈉為 ${serumNa} mEq/L (> 145)，屬於高血鈉（有效張力 ${effectiveOsm.toFixed(1)} mOsm/kg），不適用低血鈉鑑別流程。`
+        : `實測血鈉為 ${serumNa} mEq/L (135–145)，未達低血鈉定義 (< 135 mEq/L)。`;
+    nextAction =
+      serumNa > 145
+        ? "請評估自由水虧損與尿崩症／高張液輸入原因；若欲試算低張點滴（如 D5W、0.45% NaCl）降鈉速率，可使用 Step 5B 並將目標變化量設為負值。"
+        : "無需進入低血鈉 Step 3/4 尿液分類。";
+    proceedToStep3 = false;
+  } else if (!hasMeasuredOsm) {
     if (effectiveOsm > 285 && hasGlucose && glucoseMgDl >= 250) {
       branchId = "hypertonic_hyperglycemia_suspected";
       branchTitle = "疑似高張性／高血糖轉移性低血鈉 (待補實測 Serum Osm)";
       branchBadge = "Effective Osm > 285";
       clinicalSummary = `實測 Serum Osm 尚未輸入，但依血糖 ${glucoseMgDl} mg/dL 計算之有效張力已達 ${effectiveOsm.toFixed(1)} mOsm/kg（Katz 校正 Na ${katzCorrectedNa.toFixed(1)}、Hillier 校正 Na ${hillierCorrectedNa.toFixed(1)} mEq/L）。`;
       nextAction =
-        "請補齊實測 Serum Osmolality；針對高血糖進行輸液與胰島素治療，血鈉將隨血糖下降而回升。",
-      proceedToStep3 = false;
+        "請補齊實測 Serum Osmolality；針對高血糖進行輸液與胰島素治療，血鈉將隨血糖下降而回升。";
+      proceedToStep3 = katzCorrectedNa !== null && katzCorrectedNa < 135;
     } else {
       branchId = "pending_measured_osm";
       branchTitle = "待輸入實測血清滲透壓 (Measured Serum Osmolality)";
       branchBadge = `有效張力估計 ${effectiveOsm.toFixed(1)} mOsm/kg`;
       clinicalSummary = `目前僅由有效滲透壓估算為 ${effectiveOsm.toFixed(1)} mOsm/kg。請輸入實測 Serum Osmolality 以排除假性低血鈉或未測量外源性滲透壓物質（Mannitol、乙醇、毒性醇類）。`;
       nextAction =
-        "若臨床高度懷疑真性低張性低血鈉，可同步往下填寫 Step 3 尿液滲透壓與尿鈉。",
+        "若臨床高度懷疑真性低張性低血鈉，可同步往下填寫 Step 3 尿液滲透壓與尿鈉。";
       proceedToStep3 = effectiveOsm < 280;
     }
   } else if (effectiveOsm > 285) {
@@ -710,22 +750,22 @@ export function evaluateStep2Osmolality({
     branchBadge = `Measured ${measuredOsm} / Effective ${effectiveOsm.toFixed(1)} mOsm/kg`;
     clinicalSummary = `有效滲透壓（張力）為 ${effectiveOsm.toFixed(1)} mOsm/kg (> 285)，代表細胞外液具高張溶質（如高血糖${hasGlucose ? ` ${glucoseMgDl} mg/dL，Katz 校正 Na = ${katzCorrectedNa.toFixed(1)} mEq/L` : ""}）將水分由細胞內拉出稀釋血鈉。`;
     nextAction =
-      "治療高血糖或停用高張溶質（Mannitol／高張葡萄糖）；隨高血糖矯正，水分回到細胞內，血鈉會自動回升。若 Katz/Hillier 校正後血鈉仍 < 135 mEq/L，代表同時合併低張性低血鈉。",
+      "治療高血糖或停用高張溶質（Mannitol／高張葡萄糖）；隨高血糖矯正，水分回到細胞內，血鈉會自動回升。若 Katz/Hillier 校正後血鈉仍 < 135 mEq/L，代表同時合併低張性低血鈉。";
     proceedToStep3 = katzCorrectedNa !== null && katzCorrectedNa < 135;
   } else if (
     measuredOsm >= 280 &&
-    effectiveOsm < 275 &&
-    (bunMgDl > 35 || (hasEthanol && ethanolMgDl > 10)) &&
+    effectiveOsm < 280 &&
+    (bunMgDl > 20 || (hasEthanol && ethanolMgDl > 0)) &&
     effectiveOsm + Math.max(0, osmolalGapAfterEthanol ?? 0) < 280
   ) {
-    // Codex 核心修正：實測總滲透壓 ≥ 280 (甚至 > 285)，但有效張力 < 275 且由顯著高 BUN (> 35 mg/dL) 或 Ethanol 等無效滲透壓物質造成！
+    // Codex 核心修正：實測總滲透壓 ≥ 280 (甚至 > 285)，但有效張力 < 280 且由高 BUN 或 Ethanol 等無效滲透壓物質墊高所致！
     branchId = "hypotonic_with_ineffective_osmoles";
     branchTitle =
       "真性低張性低血鈉合併無效滲透壓物質升高 (True Hypotonic Hyponatremia with Azotemia / Ethanol)";
     branchBadge = `總滲透壓 ${measuredOsm} ≥ 280，但有效張力 ${effectiveOsm.toFixed(1)} < 280`;
-    clinicalSummary = `⚠️ 重要臨床陷阱（PMC13424767）：雖然實測總滲透壓為 ${measuredOsm} mOsm/kg，但高 BUN（貢獻 +${bunOsmTerm.toFixed(1)} mOsm/kg）與乙醇（貢獻 +${ethanolOsmTerm46.toFixed(1)} mOsm/kg）屬於可自由穿透細胞膜的「無效滲透壓物質 (Ineffective osmoles)」，不會拉水出細胞。病患的實際有效張力 (Effective Tonicity = 2×Na + Glc/18) 僅 ${effectiveOsm.toFixed(1)} mOsm/kg (< 280)，本質上仍是「真性低張性低血鈉」！`;
+    clinicalSummary = `⚠️ 重要臨床陷阱（PMC13424767）：雖然實測總滲透壓為 ${measuredOsm} mOsm/kg (≥ 280)，但高 BUN（貢獻 +${bunOsmTerm.toFixed(1)} mOsm/kg）與乙醇（貢獻 +${ethanolOsmTerm46.toFixed(1)} mOsm/kg）屬於可自由穿透細胞膜的「無效滲透壓物質 (Ineffective osmoles)」，不會拉水出細胞。病患的實際有效張力 (Effective Tonicity = 2×Na + Glc/18) 僅 ${effectiveOsm.toFixed(1)} mOsm/kg (< 280)，本質上仍是「真性低張性低血鈉」！`;
     nextAction =
-      "切勿誤判為高張性或假性低血鈉而忽略治療！請直接進入 Step 3 評估 Urine Osm、Urine Na 與體液狀態。",
+      "切勿誤判為高張性或假性低血鈉而忽略治療！請直接進入 Step 3 評估 Urine Osm、Urine Na 與體液狀態。";
     proceedToStep3 = true;
   } else if (measuredOsm > 285) {
     // Measured Osm > 285，且非單純高 BUN / 已知乙醇所致（例如 Mannitol、Sorbitol、Contrast 或未填乙醇之高 Osmolal Gap）
@@ -734,9 +774,9 @@ export function evaluateStep2Osmolality({
       branchTitle =
         "高實測滲透壓伴滲透壓間隙升高 (> 285 mOsm/kg & Osmolal Gap > 10)";
       branchBadge = `Measured ${measuredOsm}｜Osm Gap ${osmolalGapNoEthanol.toFixed(1)}`;
-      clinicalSummary = `實測滲透壓 ${measuredOsm} mOsm/kg (> 285)，但有效張力（2×Na + Glc/18）僅 ${effectiveOsm.toFixed(1)} mOsm/kg，滲透壓間隙高達 ${osmolalGapNoEthanol.toFixed(1)} mOsm/kg。需考慮外源性溶質：若為 Mannitol、Sorbitol、顯影劑、Glycine、Maltose (IVIG)，屬「有效滲透壓物質」造成轉移性高張低血鈉；若為未填報之乙醇或毒性醇類（甲醇、乙二醇），則為無效滲透壓物質合併真性低張性低血鈉。`;
+      clinicalSummary = `實測滲透壓 ${measuredOsm} mOsm/kg (> 285)，但有效張力（2×Na + Glc/18）僅 ${effectiveOsm.toFixed(1)} mOsm/kg，滲透壓間隙高達 ${osmolalGapNoEthanol.toFixed(1)} mOsm/kg。需考慮外源性溶質：若為 Mannitol、Sorbitol、顯影劑、Glycine、Maltose (IVIG)，屬「有效滲透壓物質」造成轉移性高張低血鈉；若為未填報之乙醇或毒性醇類（甲醇、乙二醇），則為無效滲透壓物質合併真性低張性低血鈉（另若使用 Indirect ISE 亦須排除嚴重高血脂／高蛋白造成之假性高間隙）。`;
       nextAction =
-        "1. 核對用藥史（Mannitol、IVIG、灌洗液、顯影劑）與抽測血中乙醇／毒性醇類、血液氣體分析（Anion Gap 代謝性酸中毒）。2. 若為乙醇／毒性醇類所致，仍應同時進入 Step 3 評估低張性低血鈉。",
+        "1. 核對用藥史（Mannitol、IVIG、灌洗液、顯影劑）與抽測血中乙醇／毒性醇類、ABG/VBG Direct ISE。2. 若為乙醇／毒性醇類所致，仍應同時進入 Step 3 評估低張性低血鈉。";
       proceedToStep3 = true;
     } else {
       branchId = "hypertonic";
@@ -744,25 +784,37 @@ export function evaluateStep2Osmolality({
       branchBadge = `Measured ${measuredOsm} mOsm/kg`;
       clinicalSummary = `實測血清滲透壓 ${measuredOsm} mOsm/kg (> 285)。${!hasGlucose || !hasBun ? "請補齊血糖 (Glucose) 與尿素氮 (BUN) 以精確計算有效張力與滲透壓間隙。" : "考慮高血糖或外源性高張溶質（Mannitol、Sorbitol、顯影劑）。"}`;
       nextAction =
-        "請確認血糖與 BUN 數值以排除尿毒症（Azotemia）造成之假性高滲透壓，並評估是否有 Mannitol／顯影劑使用史。",
+        "請確認血糖與 BUN 數值以排除尿毒症（Azotemia）造成之假性高滲透壓，並評估是否有 Mannitol／顯影劑使用史。";
       proceedToStep3 = false;
     }
   } else if (measuredOsm >= 280 && measuredOsm <= 285) {
     // 280–285 mOsm/kg: Isotonic / Pseudohyponatremia vs Osmolal Gap > 10
+    // 注意：在 Indirect ISE 下，若發生假性低血鈉（如真實 Na 140 但 Indirect ISE 測得 122），
+    // 代入 2×122 算出之 Calculated Osm 必然偏低，算術上同樣會呈現 Osmolal Gap > 10！
     if (osmolalGapNoEthanol !== null && osmolalGapNoEthanol > 10) {
-      branchId = "isotonic_high_gap";
-      branchTitle =
-        "正常滲透壓伴高滲透壓間隙 (280–285 mOsm/kg & Osmolal Gap > 10)";
-      branchBadge = `Measured ${measuredOsm}｜Osm Gap ${osmolalGapNoEthanol.toFixed(1)}`;
-      clinicalSummary = `實測滲透壓落於 280–285 mOsm/kg，但滲透壓間隙為 ${osmolalGapNoEthanol.toFixed(1)} mOsm/kg (> 10)。提示血中存在未測量溶質（乙醇、甲醇、乙二醇、丙二醇，或 Mannitol／Sorbitol／甘胺酸灌洗液）把原本偏低的滲透壓墊高至正常區間！`;
-      nextAction =
-        "檢測血中乙醇、毒性醇類與動脈血氣分析；若為乙醇等無效滲透壓物質，其底層仍為真性低張性低血鈉，請同步評估 Step 3。",
-      proceedToStep3 = true;
+      if (iseMethod === "direct") {
+        branchId = "isotonic_high_gap";
+        branchTitle =
+          "等張滲透壓伴高滲透壓間隙 (280–285 mOsm/kg & Direct ISE Osmolal Gap > 10)";
+        branchBadge = `Measured ${measuredOsm}｜Osm Gap ${osmolalGapNoEthanol.toFixed(1)}`;
+        clinicalSummary = `已使用 Direct ISE 排除高血脂／高蛋白假性低血鈉，實測滲透壓落於 280–285 mOsm/kg 但滲透壓間隙高達 ${osmolalGapNoEthanol.toFixed(1)} mOsm/kg (> 10)。提示血中存在未測量外源性溶質（乙醇、甲醇、乙二醇、丙二醇，或 TURP／子宮鏡等張無鈉灌洗液如甘胺酸 Glycine、山梨醇 Sorbitol、Mannitol）！`;
+        nextAction =
+          "檢測血中乙醇、毒性醇類與手術灌洗液吸收史；若為乙醇等無效滲透壓物質，其底層仍為真性低張性低血鈉，請同步評估 Step 3。";
+        proceedToStep3 = true;
+      } else {
+        branchId = "isotonic_pseudohyponatremia";
+        branchTitle =
+          "等張性／假性低血鈉 或 未測量外源溶質 (280–285 mOsm/kg, Indirect ISE Osm Gap > 10)";
+        branchBadge = `Measured ${measuredOsm}｜視同 Osm Gap ${osmolalGapNoEthanol.toFixed(1)}`;
+        clinicalSummary = `實測滲透壓正常（${measuredOsm} mOsm/kg，280–285 等張區間），而由實測 Na (${serumNa}) 推算之滲透壓間隙為 ${osmolalGapNoEthanol.toFixed(1)} mOsm/kg (> 10)。請注意兩大鑑別：① **假性低血鈉 (Pseudohyponatremia)**：在傳統 Indirect ISE 下，嚴重高三酸甘油酯血症或高蛋白血症（多發性骨髓瘤等）會使實測 Na 被假性低估，連帶使計算滲透壓偏低而產生假性高 Osmolal Gap！② **外源性未測量溶質**：乙醇、毒性醇類或無鈉灌洗液將原本低張之血漿墊高至 280–285。`;
+        nextAction = `${iseExplanation} 同時若懷疑飲酒或中毒，請加測血中乙醇／毒性醇類（若為乙醇墊高，底層仍可能為真性低張性低血鈉）。`;
+        proceedToStep3 = false;
+      }
     } else {
       branchId = "isotonic_pseudohyponatremia";
       branchTitle = "等張性／假性低血鈉 (Isotonic / Pseudohyponatremia, 280–285 mOsm/kg)";
       branchBadge = `Measured ${measuredOsm} mOsm/kg｜Osm Gap ≤ 10`;
-      clinicalSummary = `實測滲透壓正常（${measuredOsm} mOsm/kg）且無顯著滲透壓間隙。最常見於嚴重高三酸甘油酯血症（Hypertriglyceridemia）、高蛋白血症／多發性骨髓瘤（Paraproteinemia）或阻塞性黃疸脂蛋白 X（Lipoprotein X）。`;
+      clinicalSummary = `實測滲透壓正常（${measuredOsm} mOsm/kg）且無顯著滲透壓間隙。最常見於高三酸甘油酯血症（Hypertriglyceridemia）、高蛋白血症／多發性骨髓瘤（Paraproteinemia）或阻塞性黃疸脂蛋白 X（Lipoprotein X）。`;
       nextAction = iseExplanation;
       proceedToStep3 = false;
     }
@@ -773,7 +825,7 @@ export function evaluateStep2Osmolality({
     branchBadge = `Measured ${measuredOsm} / Effective ${effectiveOsm.toFixed(1)} mOsm/kg`;
     clinicalSummary = `實測滲透壓 ${measuredOsm} mOsm/kg (< 280) 且有效張力 ${effectiveOsm.toFixed(1)} mOsm/kg (< 280)，確認為真性低張性低血鈉。${osmolalGapNoEthanol !== null && osmolalGapNoEthanol > 10 ? `（註：Osmolal Gap = ${osmolalGapNoEthanol.toFixed(1)} > 10，請同步留意外源性醇類或溶質）。` : ""}`;
     nextAction =
-      "請進入 Step 3 & Step 4：檢視尿液滲透壓 (Urine Osm)、尿鈉 (Urine Na)、尿鉀 (Urine K) 與臨床體液狀態。",
+      "請進入 Step 3 & Step 4：檢視尿液滲透壓 (Urine Osm)、尿鈉 (Urine Na)、尿鉀 (Urine K) 與臨床體液狀態。";
     proceedToStep3 = true;
   }
 

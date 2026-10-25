@@ -136,10 +136,36 @@ test("Step 1 triage triggers immediate emergency alert, separates symptom grades
   });
   assert.equal(exceeded.overcorrectionStatus, "exceeded_hard_limit");
   assert.match(exceeded.overcorrectionAlert, /已超過絕對安全上限/);
+
+  // Finite-volume 300 mL bolus (2 x 150 mL) uses V=0.3L rather than 2 * bolus150
+  const withBolus300 = evaluateStep1Triage({
+    serumNa: 113.3,
+    weightKg: 60,
+    tbwL: 30,
+    onset: "acute_lt_48h",
+  });
+  assert.ok(Math.abs(withBolus300.bolus300.deltaNaFinite - 120 / 30.3) < 1e-6);
+  assert.ok(withBolus300.bolus300.deltaNaFinite < withBolus300.bolus150.deltaNaFinite * 2);
+  assert.match(withBolus300.onsetNote, /明確急性發作/);
+
+  // Serum Na >= 135 sets isHyponatremia = false and provides nonHyponatremiaNote
+  const normalNa = evaluateStep1Triage({ serumNa: 140 });
+  assert.equal(normalNa.isHyponatremia, false);
+  assert.match(normalNa.nonHyponatremiaNote, /正常血鈉範圍/);
 });
 
 test("Step 2 osmolality separates glucose-corrected Na from measured Na and catches hypotonic hyponatremia with high BUN/ethanol", () => {
-  // Case A: Azotemia / Ethanol with Measured Osm = 295 (> 285!), Na = 118, Glucose = 90, BUN = 140 (BUN/2.8 = 50)
+  // Case 0: Normal Na or Hypernatremia (Na >= 135) must NOT be classified as hyponatremia
+  const notHypo = evaluateStep2Osmolality({
+    serumNa: 140,
+    measuredOsm: 278,
+    glucoseMgDl: 90,
+    bunMgDl: 14,
+  });
+  assert.equal(notHypo.branchId, "not_hyponatremia");
+  assert.equal(notHypo.proceedToStep3, false);
+
+  // Case A1: Azotemia / Ethanol with Measured Osm = 295 (> 285!), Na = 118, Glucose = 90, BUN = 140 (BUN/2.8 = 50)
   // Effective Osm = 2*118 + 5 = 241 (< 280!)
   // Must NOT be misclassified as hypertonic! Must be hypotonic_with_ineffective_osmoles & proceedToStep3 = true
   const azotemiaCase = evaluateStep2Osmolality({
@@ -152,9 +178,28 @@ test("Step 2 osmolality separates glucose-corrected Na from measured Na and catc
   assert.equal(azotemiaCase.branchId, "hypotonic_with_ineffective_osmoles");
   assert.equal(azotemiaCase.proceedToStep3, true);
 
-  // Case B: Severe hyperglycemia (Na = 124, Glucose = 600, BUN = 28, Measured Osm = 315)
-  // Katz = 124 + 0.016*(500) = 132; Hillier = 124 + 0.024*(500) = 136
-  // Effective Osm = 248 + 33.33 = 281.33; if Glucose = 700 -> Effective Osm = 248 + 38.89 = 286.89 (> 285)
+  // Case A2: Azotemia in the 275-280 effectiveOsm zone (Na = 134, Glucose = 144 -> Effective Osm = 276 < 280; BUN = 84 -> Calc = 306, Measured = 306)
+  const azotemia276 = evaluateStep2Osmolality({
+    serumNa: 134,
+    measuredOsm: 306,
+    glucoseMgDl: 144,
+    bunMgDl: 84,
+  });
+  assert.equal(azotemia276.effectiveOsm, 276);
+  assert.equal(azotemia276.branchId, "hypotonic_with_ineffective_osmoles");
+  assert.equal(azotemia276.proceedToStep3, true);
+
+  // Case A3: Milder azotemia (Na = 132, Glucose = 90 -> Effective Osm = 269 < 280; BUN = 31 -> +11.1, Measured = 280)
+  const azotemiaMild = evaluateStep2Osmolality({
+    serumNa: 132,
+    measuredOsm: 280,
+    glucoseMgDl: 90,
+    bunMgDl: 31,
+  });
+  assert.equal(azotemiaMild.branchId, "hypotonic_with_ineffective_osmoles");
+  assert.equal(azotemiaMild.proceedToStep3, true);
+
+  // Case B: Severe hyperglycemia (Na = 124, Glucose = 700, BUN = 28, Measured Osm = 318)
   const hyperglyCase = evaluateStep2Osmolality({
     serumNa: 124,
     measuredOsm: 318,
@@ -167,18 +212,30 @@ test("Step 2 osmolality separates glucose-corrected Na from measured Na and catc
   assert.ok(Math.abs(hyperglyCase.calculatedOsmNoEthanol - (248 + 700 / 18 + 10)) < 1e-6);
   assert.equal(hyperglyCase.branchId, "hypertonic");
 
-  // Case C: Isotonic Pseudohyponatremia (Measured Osm = 283, Na = 125, Glc = 90, BUN = 14 -> Calc = 260, Wait: if Measured = 283 and Calc = 260, Osm Gap = 23 -> high gap! Why? Because in pseudohyponatremia on indirect ISE, Na is falsely low so Calc Osm is ALSO falsely low, wait: let's check!)
-  // Wait! In true pseudohyponatremia (hyperlipidemia/paraproteinemia), Measured Osm is 283, and if Na is 138 in plasma water but 125 by indirect ISE, Calc Osm is 260, so Measured - Calc is actually elevated unless Osm Gap <= 10. Wait: in the user's prompt:
-  // "280–285 mOsm/kg / “Isotonic” / pseudohyponatremia / Consider hyperlipidemia, paraproteinemia; check osmolal gap if alcohol/toxin possible."
-  const pseudoCase = evaluateStep2Osmolality({
-    serumNa: 132,
-    measuredOsm: 282,
-    glucoseMgDl: 108,
-    bunMgDl: 28,
+  // Case C1: Classic Pseudohyponatremia on Indirect ISE (Na = 122, Measured Osm = 283, Glc = 90, BUN = 14)
+  // Because Indirect ISE Na is falsely low (122), Calc Osm is 254 and apparent Osm Gap is 29 (> 10).
+  // On Indirect ISE, this MUST still be identified as isotonic_pseudohyponatremia (and warn about both pseudohyponatremia & unmeasured osmoles)
+  const pseudoIndirect122 = evaluateStep2Osmolality({
+    serumNa: 122,
+    measuredOsm: 283,
+    glucoseMgDl: 90,
+    bunMgDl: 14,
+    iseMethod: "indirect",
   });
-  // Calc Osm = 264 + 6 + 10 = 280, Gap = 2 <= 10
-  assert.equal(pseudoCase.branchId, "isotonic_pseudohyponatremia");
-  assert.equal(pseudoCase.proceedToStep3, false);
+  assert.equal(pseudoIndirect122.branchId, "isotonic_pseudohyponatremia");
+  assert.equal(pseudoIndirect122.proceedToStep3, false);
+  assert.match(pseudoIndirect122.clinicalSummary, /假性低血鈉/);
+
+  // Case C2: Same numbers on Direct ISE (where lipid/protein artifact is already excluded) -> isotonic_high_gap
+  const directHighGap122 = evaluateStep2Osmolality({
+    serumNa: 122,
+    measuredOsm: 283,
+    glucoseMgDl: 90,
+    bunMgDl: 14,
+    iseMethod: "direct",
+  });
+  assert.equal(directHighGap122.branchId, "isotonic_high_gap");
+  assert.equal(directHighGap122.proceedToStep3, true);
 
   // Case D: True hypotonic hyponatremia (< 280)
   const hypotonicCase = evaluateStep2Osmolality({

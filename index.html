@@ -1559,17 +1559,30 @@
       $("ods-hypok").checked = false;
     }
 
-    // 若使用者勾選了嚴重或中度症狀 checkbox，自動同步上方 radio
-    if (event && event.target && event.target.classList.contains("sym-severe-cb")) {
-      const anySevere = [...document.querySelectorAll(".sym-severe-cb:checked")].length > 0;
-      if (anySevere) {
-        document.querySelector('input[name="symptom-severity"][value="severe"]').checked = true;
+    // 雙向同步：嚴重／中度症狀 checkbox 與 symptom-severity radio
+    if (event && event.target && event.target.name === "symptom-severity") {
+      const val = event.target.value;
+      if (val === "mild_none") {
+        document
+          .querySelectorAll(".sym-severe-cb, .sym-mod-cb")
+          .forEach((cb) => (cb.checked = false));
+      } else if (val === "moderate") {
+        document.querySelectorAll(".sym-severe-cb").forEach((cb) => (cb.checked = false));
       }
-    } else if (event && event.target && event.target.classList.contains("sym-mod-cb")) {
+    } else if (
+      event &&
+      event.target &&
+      (event.target.classList.contains("sym-severe-cb") ||
+        event.target.classList.contains("sym-mod-cb"))
+    ) {
       const anySevere = [...document.querySelectorAll(".sym-severe-cb:checked")].length > 0;
       const anyMod = [...document.querySelectorAll(".sym-mod-cb:checked")].length > 0;
-      if (!anySevere && anyMod) {
+      if (anySevere) {
+        document.querySelector('input[name="symptom-severity"][value="severe"]').checked = true;
+      } else if (anyMod) {
         document.querySelector('input[name="symptom-severity"][value="moderate"]').checked = true;
+      } else {
+        document.querySelector('input[name="symptom-severity"][value="mild_none"]').checked = true;
       }
     }
 
@@ -1663,7 +1676,8 @@
       priorRise24hInput: parseOptionalNumber($("prior-rise-24h").value),
       elapsedHours24h: parseOptionalNumber($("elapsed-hours-24h").value),
       includePlannedBolusInQuota: $("include-bolus-quota").checked,
-      customBolusConcMeqL: 513.3,
+      customBolusConcMeqL:
+        $("infusate-select").value === "custom_mix" ? lastCustomMixMeqL : 513.3,
     });
     renderStep1(step1);
 
@@ -1681,6 +1695,15 @@
     // 5. Step 3 & 4 尿液與 6 大分類
     const volumeStatus =
       document.querySelector('input[name="volume-status"]:checked')?.value || "equivocal";
+    const rawBun = parseOptionalNumber($("bun-mgdl").value);
+    const ureaUnitMode = $("urea-unit-mode").value;
+    const serumUreaForFe =
+      rawBun !== null && !Number.isNaN(rawBun)
+        ? ureaUnitMode === "same_urea"
+          ? rawBun * 2.14
+          : rawBun
+        : null;
+
     const step34 = evaluateStep3And4UrineAndClassification({
       serumNa,
       urineOsm: parseOptionalNumber($("urine-osm").value),
@@ -1697,9 +1720,9 @@
       feInputs: {
         serumCr: parseOptionalNumber($("serum-cr").value),
         urineCr: parseOptionalNumber($("urine-cr").value),
-        serumUrea: parseOptionalNumber($("bun-mgdl").value),
+        serumUrea: serumUreaForFe,
         urineUrea: parseOptionalNumber($("urine-urea").value),
-        ureaUnitMode: $("urea-unit-mode").value,
+        ureaUnitMode,
         serumUa: parseOptionalNumber($("serum-ua").value),
         urineUa: parseOptionalNumber($("urine-ua").value),
         urineCl: parseOptionalNumber($("urine-cl").value),
@@ -1773,7 +1796,7 @@
             <div class="kpi-card">
               <div class="kpi-label">單次 150 mL 3% NaCl (ESE)</div>
               <div class="kpi-val">+${step1.bolus150.deltaNaFinite.toFixed(2)} mEq/L</div>
-              <div class="kpi-sub">2 次 150 mL 約 +${(step1.bolus150.deltaNaFinite * 2).toFixed(2)} mEq/L</div>
+              <div class="kpi-sub">2 次共 300 mL (有限體積)：+${(step1.bolus300 ? step1.bolus300.deltaNaFinite : step1.bolus150.deltaNaFinite * 2).toFixed(2)} mEq/L</div>
             </div>
             ${
               step1.bolus2MlKg
@@ -1822,6 +1845,11 @@
         <span>🛡️ 安全矯正目標與 24h 累計配額：${lim.profileName}</span>
         <span class="step-badge">${step1.hasMajorOdsRisk ? "高 ODS 風險群 (上限 ≤ 8)" : "標準慢性安全基準 (上限 ≤ 10)"}</span>
       </div>
+      ${
+        step1.nonHyponatremiaNote
+          ? `<div style="margin:0 0 8px; padding:8px 11px; border-radius:8px; background:#fffbeb; border:1.5px solid var(--amber-bd); color:var(--amber); font-weight:700; font-size:0.85rem;">${step1.nonHyponatremiaNote}</div>`
+          : ""
+      }
       <div class="kpi-row">
         <div class="kpi-card">
           <div class="kpi-label">24h 建議目標升幅 (Target)</div>
@@ -1847,8 +1875,13 @@
         </div>
       </div>
       ${
+        step1.onsetNote
+          ? `<p style="margin:8px 0 0; font-size:0.82rem; color:var(--body);">${step1.onsetNote}</p>`
+          : ""
+      }
+      ${
         step1.activeMajorOdsReasons.length > 0
-          ? `<p style="margin:8px 0 0; font-size:0.84rem;"><b>已觸發主要 ODS 風險因子：</b>${step1.activeMajorOdsReasons.join("、")}</p>`
+          ? `<p style="margin:6px 0 0; font-size:0.84rem;"><b>已觸發主要 ODS 風險因子：</b>${step1.activeMajorOdsReasons.join("、")}</p>`
           : ""
       }
       ${
@@ -1947,7 +1980,9 @@
       $("fnode-tonicity").classList.add("active");
     }
 
-    if (step34.hasUrineOsm) {
+    const allowHypotonicFlow = !step2.isValid || step2.proceedToStep3;
+
+    if (allowHypotonicFlow && step34.hasUrineOsm) {
       if (step34.urineOsm <= 100) {
         $("fnode-uosm-low").classList.add("active");
       } else {
@@ -1962,12 +1997,14 @@
       cat5_hypervol_low_una: "fnode-cat5",
       cat6_hypervol_high_una: "fnode-cat6",
     };
-    step34.candidateCategories.forEach((c) => {
-      const targetId = catNodeMap[c.id];
-      if (targetId && $(targetId)) {
-        $(targetId).classList.add("active");
-      }
-    });
+    if (allowHypotonicFlow) {
+      step34.candidateCategories.forEach((c) => {
+        const targetId = catNodeMap[c.id];
+        if (targetId && $(targetId)) {
+          $(targetId).classList.add("active");
+        }
+      });
+    }
 
     // 渲染尿液 KPI
     const kpiHtml = [];
@@ -2004,6 +2041,14 @@
 
     // 渲染干擾與脫鹽警示
     const warnBoxes = [];
+    if (step2.isValid && !step2.proceedToStep3) {
+      warnBoxes.push(`
+        <div class="alert-box amber">
+          <div class="alert-title"><span>🛑 Step 2 提示目前「非真性低張性低血鈉」(${step2.branchTitle})</span></div>
+          <p style="margin:0; font-size:0.85rem;">Step 3 &amp; Step 4 的尿液 6 大分類僅適用於<b>真性低張性低血鈉 (Effective Tonicity &lt; 280 mOsm/kg)</b>。請先依 Step 2 建議處理高血糖／外源高張溶質、改用 Direct ISE 排除假性低血鈉，或確認是否合併底層低張性低血鈉。</p>
+        </div>
+      `);
+    }
     if (step34.desalinationMessage) {
       warnBoxes.push(`
         <div class="alert-box ${step34.desalinationRisk === "high_confirmed" ? "red" : "amber"}">
@@ -2030,6 +2075,10 @@
 
     // 渲染 Step 4 六大分類結果卡片
     const out = $("step4-category-output");
+    if (step2.isValid && !step2.proceedToStep3) {
+      out.innerHTML = "";
+      return;
+    }
     if (!step34.hasUrineOsm) {
       out.innerHTML = `
         <div class="alert-box teal">

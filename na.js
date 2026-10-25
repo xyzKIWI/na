@@ -1638,6 +1638,32 @@ export function calculateOvercorrectionRescue({
 }
 
 /**
+ * 鈉缺失量 (MDCalc #95 Sodium Deficit in Hyponatremia)
+ * 鈉缺失量 (mEq) = TBW × (目標 Na − 實測 Na)；換算點滴體積 (mL) = 缺失量 ÷ 點滴濃度 × 1000
+ * 注意：未計入點滴本身帶入的水分，所需體積會比 Adrogué-Madias 公式少，僅供對照
+ */
+export function calculateSodiumDeficit({ tbwL, serumNa, targetNa, infusateMeqL = 513.3 }) {
+  if (
+    !Number.isFinite(tbwL) ||
+    tbwL <= 0 ||
+    !Number.isFinite(serumNa) ||
+    serumNa <= 0 ||
+    !Number.isFinite(targetNa) ||
+    targetNa <= serumNa ||
+    !Number.isFinite(infusateMeqL) ||
+    infusateMeqL <= 0
+  ) {
+    return null;
+  }
+  const deficitMeq = tbwL * (targetNa - serumNa);
+  return {
+    deficitMeq,
+    infusateMeqL,
+    infusateVolumeMl: (deficitMeq / infusateMeqL) * 1000,
+  };
+}
+
+/**
  * 產生去識別化臨床病歷摘要 (EMR Clinical Note)
  * 僅供臨床評估紀錄參考，不產生直接可照抄之未覆核醫囑
  */

@@ -234,6 +234,60 @@
     font-size: 0.8rem;
     font-weight: 600;
   }
+  /* 急診下一步檢驗 */
+  .labs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 10px;
+  }
+  .labs-col {
+    background: #f8fafc;
+    border: 1px solid var(--line-light);
+    border-radius: 10px;
+    padding: 10px 12px;
+  }
+  .labs-col h3 {
+    margin: 0 0 6px;
+    font-size: 0.92rem;
+    color: var(--navy);
+  }
+  .labs-col ul {
+    margin: 0;
+    padding-left: 1.1rem;
+    font-size: 0.84rem;
+    line-height: 1.6;
+  }
+  /* 3% NaCl 建議劑量 */
+  .hts-dose {
+    background: #fff;
+    border: 2px solid var(--teal);
+    border-radius: 12px;
+    padding: 14px 15px;
+    margin-bottom: 16px;
+  }
+  .hts-dose h3 {
+    margin: 0 0 8px;
+    font-size: 1.05rem;
+    color: var(--navy);
+  }
+  .hts-dose .hts-line {
+    margin: 6px 0 0;
+    font-size: 0.88rem;
+    line-height: 1.6;
+  }
+  .hts-dose .hts-big {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--teal-dark);
+    font-variant-numeric: tabular-nums;
+  }
+  .hts-dose .hts-note {
+    margin: 6px 0 0;
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+  body.quick-mode .step5-hts { order: 0; }
+
   /* 快速模式：只顯示目前方案的 Bolus 試算卡 */
   body.quick-mode .kpi-card[data-bolus]:not(.is-active-regimen) { display: none; }
   /* 快速模式：Step 5 依急診使用順序排列（速率 → 救援 → 泡製） */
@@ -269,6 +323,7 @@
     body.quick-mode .kpi-row { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
     body.quick-mode .kpi-card { padding: 8px 9px; }
     body.quick-mode .kpi-card .kpi-val { font-size: 1.05rem; }
+    body.quick-mode .labs-col ul { font-size: 0.8rem; }
     body.quick-mode .bottom-bar { padding: 6px 12px calc(6px + env(safe-area-inset-bottom)); }
     body.quick-mode .bottom-inner { gap: 6px; }
     body.quick-mode .live-status {
@@ -882,6 +937,7 @@
       </div>
       <div class="step-links">
         <a class="step-jump" href="#step1">Step 1 急症與上限</a>
+        <a class="step-jump" href="#labs">下一步檢驗</a>
         <a class="step-jump" href="#step2" data-advanced>Step 2 滲透壓/張力</a>
         <a class="step-jump" href="#step34" data-advanced>Step 3–4 尿液與 6 分類</a>
         <a class="step-jump" href="#step5">Step 5 泡製/速率/救援</a>
@@ -1076,6 +1132,44 @@
 
     <!-- Step 1 矯正目標與剩餘配額輸出 -->
     <div id="step1-limits-panel" class="alert-box teal"></div>
+  </section>
+
+  <!-- ==================== 急診下一步檢驗 ==================== -->
+  <section class="step-card" id="labs">
+    <div class="step-header">
+      <div class="step-title-group">
+        <span class="step-num">LABS</span>
+        <h2>急診下一步檢驗：低血鈉鑑別診斷要抽什麼</h2>
+      </div>
+      <span class="step-badge">依 ESE 2014 指引整理</span>
+    </div>
+    <div class="labs-grid">
+      <div class="labs-col">
+        <h3>① 發現 Na 低下，治療前一起抽</h3>
+        <ul>
+          <li><b>血</b>：Glucose（高血糖需校正 Na；ESE 6.2.1.1）、Serum Osm（&lt; 275 一定是低張；ESE 6.2.1.2）、BUN／Cr、K（低血鉀屬 ODS 高風險）</li>
+          <li><b>同一管 spot 尿</b>：Urine Osm、Urine Na（ESE 6.3.1.1–6.3.1.3）、Urine K（U_Na + U_K 判斷 0.9% NaCl 會不會越補越低）</li>
+          <li>血與尿要<b>同時</b>採檢；盡量在給 0.9% NaCl 或利尿劑之前（ESE 6.3 Advice）</li>
+        </ul>
+      </div>
+      <div class="labs-col">
+        <h3>② U_Osm &gt; 100、懷疑 SIAD 或體液狀態不明時加抽</h3>
+        <ul>
+          <li><b>TSH</b>（± Free T4）、<b>Cortisol</b>（± ACTH）：SIAD 須先排除甲狀腺、腎上腺、腦下垂體與腎功能不全（ESE Table 6；6.3 Advice）</li>
+          <li><b>Serum Uric acid</b>：&lt; 4 mg/dL 支持 SIAD（ESE Table 6）</li>
+          <li><b>尿 Urea／UUN、尿 Cr、尿 Uric acid</b>（配合血 Cr、BUN）：算 FE_Urea &gt; 55%、FENa &gt; 0.5%、FE_UA &gt; 12% 支持 SIAD；正在用利尿劑時 FE_UA 仍可參考（ESE Table 6；Fenske 2008）</li>
+          <li>不建議測 Vasopressin（ESE 6.3.1.6）</li>
+        </ul>
+      </div>
+      <div class="labs-col">
+        <h3>③ 依 Step 2 滲透壓結果選擇性加驗</h3>
+        <ul>
+          <li><b>Step 2 判讀為等張／偽性低血鈉</b>：Triglyceride、Total protein，或用血氣機 Direct ISE 重測 Na</li>
+          <li><b>Osmolal gap &gt; 10</b>：Ethanol、毒性醇類（Methanol、Ethylene glycol）</li>
+          <li><b>血糖明顯升高</b>：以 Katz／Hillier 校正 Na 後再判讀（ESE 6.2.1.1）</li>
+        </ul>
+      </div>
+    </div>
   </section>
 
   <!-- ==================== STEP 2 ==================== -->
@@ -1355,8 +1449,11 @@
       <span class="step-badge">MDCalc #480 擴充版 ＋ 雙模式泡製回代 ＋ D5W/DDAVP</span>
     </div>
 
+    <!-- 商業 3% NaCl 建議劑量（彙整 Step 1 Bolus 與 5B 速率） -->
+    <div class="step5-block step5-hts hts-dose" id="hts-dose-box"></div>
+
     <!-- 5A. 3% NaCl 床邊泡製換算器（雙模式） -->
-    <div class="step5-block step5-mix" style="background:#f8fafc; border:1.5px solid var(--line); border-radius:12px; padding:15px; margin-bottom:16px;">
+    <div class="step5-block step5-mix" data-advanced style="background:#f8fafc; border:1.5px solid var(--line); border-radius:12px; padding:15px; margin-bottom:16px;">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
         <h3 style="margin:0; font-size:1.03rem; color:var(--navy);">🧪 5A. 3% NaCl 高張鹽水床邊泡製換算器（以 0.9% NaCl ＋ 10% NaCl 20 mL/amp 調配）</h3>
         <button type="button" class="btn-sm" id="btn-reset-mix" data-advanced>重設為標準 6 支快泡法 (3.00%)</button>
@@ -1621,6 +1718,7 @@
     calculate3PercentMixing,
     calculateInfusionPlan,
     calculateOvercorrectionRescue,
+    calculateSodiumDeficit,
     createSessionEvaluationStore,
   } from "./na.js";
 
@@ -1706,7 +1804,7 @@
   }
 
   // 急診快速模式：只隱藏進階欄位與少用點滴，計算邏輯與數值不變
-  const QUICK_INFUSATES = new Set(["hypertonic_3", "custom_mix", "ns_09", "d5w"]);
+  const QUICK_INFUSATES = new Set(["hypertonic_3", "ns_09", "d5w"]);
 
   function setDisplayMode(mode) {
     const quick = mode === "quick";
@@ -1911,6 +2009,7 @@
       categoryId: step34.primaryCategory?.id || null,
     });
     renderInfusionPlan(infusionPlan, tbwResult);
+    renderHtsDose(step1, infusionPlan, tbwResult, serumNa);
 
     // 7. Step 5C 過度矯正救援計算機
     const rescueCurrentNa =
@@ -2369,6 +2468,51 @@
         onAnyInputChanged();
       });
     }
+  }
+
+  // 商業 3% NaCl 建議劑量：只彙整既有計算結果（Step 1 Bolus、5B Adrogué-Madias 速率、MDCalc #95 鈉缺失量）
+  function renderHtsDose(step1, plan, tbwResult, serumNa) {
+    const box = $("hts-dose-box");
+    const lines = [];
+
+    if (step1.isEmergencyBolusIndicated && step1.activeStepProtocol) {
+      const bolus = step1.activeRegimenBolus;
+      lines.push(`<p class="hts-line">🚨 <b>急症 Bolus</b>（${step1.regimen.name}）：<span class="hts-big">${step1.activeStepProtocol.title}</span></p>`);
+      if (bolus) {
+        lines.push(`<p class="hts-line">本病患單次 <b>${bolus.bolusMl} mL</b> → 預期血鈉 <b>+${bolus.deltaNaFinite.toFixed(1)} mEq/L</b>（有限體積公式）</p>`);
+      }
+      lines.push(`<p class="hts-note">${step1.activeStepProtocol.repeatRule}</p>`);
+    } else {
+      lines.push(`<p class="hts-line">🟢 未勾選中度或嚴重症狀，未啟動急症 Bolus 試算（症狀分級見 Step 1）。</p>`);
+    }
+
+    if (!plan.isValid) {
+      lines.push(`<p class="hts-line">💧 <b>連續輸注</b>：${plan.error}</p>`);
+    } else {
+      const hts = plan.allFluidsTable.find((f) => f.key === "hypertonic_3");
+      const target = `${plan.targetDeltaNaMeqL >= 0 ? "+" : ""}${plan.targetDeltaNaMeqL.toFixed(1)} mEq/L / ${plan.timeHours} h`;
+      if (hts.status === "achievable" && hts.rateMlPerHour !== null) {
+        lines.push(`<p class="hts-line">💧 <b>連續輸注</b>（目標 ${target}）：<span class="hts-big">${hts.rateMlPerHour.toFixed(1)} mL/h</span>，總量 ${hts.totalVolumeMl.toFixed(0)} mL</p>`);
+        lines.push(`<p class="hts-note">Adrogué-Madias 公式，與 MDCalc #480、MSD 計算機相同：速率 = 每小時目標升幅 × (TBW + 1) ÷ (513 + K − Na) × 1000；${tbwResult.description}。目標與時間可在下方 5B 調整。</p>`);
+      } else {
+        lines.push(`<p class="hts-line">💧 <b>連續輸注</b>（目標 ${target}）：${hts.statusMessage}</p>`);
+      }
+      plan.warnings
+        .filter((w) => /剩餘安全上限/.test(w))
+        .forEach((w) => lines.push(`<p class="hts-line" style="color:var(--red); font-weight:700;">${w}</p>`));
+
+      const deficit = calculateSodiumDeficit({
+        tbwL: plan.tbwL,
+        serumNa,
+        targetNa: serumNa + plan.targetDeltaNaMeqL,
+        infusateMeqL: hts.totalConcMeqL,
+      });
+      if (deficit) {
+        lines.push(`<p class="hts-note">對照 MDCalc #95 鈉缺失量：TBW × ${plan.targetDeltaNaMeqL.toFixed(1)} = ${deficit.deficitMeq.toFixed(0)} mEq ≈ 3% NaCl ${deficit.infusateVolumeMl.toFixed(0)} mL（未計入點滴本身的水分，所以比上方 Adrogué-Madias 總量少；兩種算法不同，僅供對照）。</p>`);
+      }
+    }
+
+    box.innerHTML = `<h3>💉 商業 3% NaCl（513 mEq/L）建議劑量</h3>${lines.join("")}`;
   }
 
   function renderInfusionPlan(plan, tbwResult) {

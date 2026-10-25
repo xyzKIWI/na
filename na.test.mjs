@@ -507,3 +507,14 @@ test("createSessionEvaluationStore invalidates stale results and clinical summar
   assert.equal(store.getState().copyableSummary, null);
 });
 
+
+test("calculateSodiumDeficit follows MDCalc #95: TBW × (target − current), converted to 3% NaCl volume", async () => {
+  const { calculateSodiumDeficit } = await import("./na.js");
+  // TBW 30 L, Na 110 → 114: 30 × 4 = 120 mEq → 120 / 513.3 × 1000 = 233.8 mL
+  const r = calculateSodiumDeficit({ tbwL: 30, serumNa: 110, targetNa: 114 });
+  assert.equal(r.deficitMeq, 120);
+  assert.ok(Math.abs(r.infusateVolumeMl - (120 / 513.3) * 1000) < 1e-9);
+  assert.equal(calculateSodiumDeficit({ tbwL: 30, serumNa: 110, targetNa: 110 }), null);
+  assert.equal(calculateSodiumDeficit({ tbwL: null, serumNa: 110, targetNa: 114 }), null);
+  assert.equal(calculateSodiumDeficit({ tbwL: 30, serumNa: null, targetNa: 114 }), null);
+});

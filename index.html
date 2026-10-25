@@ -234,6 +234,52 @@
     font-size: 0.8rem;
     font-weight: 600;
   }
+  /* 快速模式：只顯示目前方案的 Bolus 試算卡 */
+  body.quick-mode .kpi-card[data-bolus]:not(.is-active-regimen) { display: none; }
+  /* 快速模式：Step 5 依急診使用順序排列（速率 → 救援 → 泡製） */
+  body.quick-mode #step5 { display: flex; flex-direction: column; gap: 14px; }
+  body.quick-mode #step5 > .step-header { margin-bottom: 0; }
+  body.quick-mode #step5 > .step5-block { margin-bottom: 0 !important; }
+  body.quick-mode .step5-rate { order: 1; }
+  body.quick-mode .step5-rescue { order: 2; }
+  body.quick-mode .step5-mix { order: 3; }
+  @media (max-width: 540px) {
+    body.quick-mode header.hero { padding: 10px 14px 12px; }
+    body.quick-mode header.hero .sub,
+    body.quick-mode .hero-badges,
+    body.quick-mode .step-badge,
+    body.quick-mode .sticky-nav .step-links,
+    body.quick-mode .sticky-nav .preset-bar { display: none; }
+    body.quick-mode .hero-top { margin-bottom: 2px; }
+    body.quick-mode .back-link { min-height: 30px; font-size: 0.82rem; }
+    body.quick-mode header.hero h1 { font-size: 1.12rem; margin: 0; }
+    body.quick-mode .sticky-nav { padding: 6px 0; margin-bottom: 8px; }
+    body.quick-mode .mode-switch { width: 100%; }
+    body.quick-mode .mode-btn { flex: 1; padding: 6px 8px; font-size: 0.8rem; }
+    body.quick-mode .quick-intro { font-size: 0.8rem; padding: 7px 10px; margin-bottom: 8px; }
+    body.quick-mode .step-header { margin-bottom: 10px; padding-bottom: 8px; }
+    body.quick-mode .step-card h2 { font-size: 1rem; }
+    body.quick-mode .check-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+    body.quick-mode .check-pill { padding: 6px 8px; font-size: 0.78rem; gap: 6px; }
+    body.quick-mode .segmented { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+    body.quick-mode .seg-item span { flex-direction: column; padding: 6px 4px; font-size: 0.76rem; line-height: 1.3; }
+    body.quick-mode .seg-item span br { display: none; }
+    body.quick-mode .seg-item span small { font-size: 0.66rem; font-weight: 500; margin-top: 2px; }
+    body.quick-mode .tracking-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    body.quick-mode .kpi-row { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    body.quick-mode .kpi-card { padding: 8px 9px; }
+    body.quick-mode .kpi-card .kpi-val { font-size: 1.05rem; }
+    body.quick-mode .bottom-bar { padding: 6px 12px calc(6px + env(safe-area-inset-bottom)); }
+    body.quick-mode .bottom-inner { gap: 6px; }
+    body.quick-mode .live-status {
+      font-size: 0.76rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    body.quick-mode .btn-primary { min-height: 38px; padding: 7px 12px; font-size: 0.84rem; }
+  }
   .link-btn {
     border: 0;
     background: none;
@@ -853,8 +899,7 @@
   </nav>
 
   <p class="quick-intro" data-quick-only>
-    ⚡ <b>急診快速模式</b>：只顯示第一時間需要的欄位——血鈉、體重、性別年齡、症狀、ODS 風險，以及 3% NaCl 劑量、速率與過度矯正救援。
-    滲透壓與尿液鑑別診斷（Step 2–4）、Bolus 方案與上限指引切換、Watson TBW、其他點滴與泡製模式 B，請按上方「🔬 完整模式」。計算公式與兩種模式完全相同。
+    ⚡ <b>急診快速模式</b>：只顯示急診常用欄位。滲透壓、尿液鑑別診斷與進階選項請切換「🔬 完整模式」，兩種模式計算結果相同。
   </p>
 
   <!-- ==================== STEP 1 ==================== -->
@@ -989,7 +1034,7 @@
       </div>
     </div>
 
-    <div class="grid-4" style="margin-top: 10px; background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid var(--line-light);">
+    <div class="grid-4 tracking-grid" style="margin-top: 10px; background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid var(--line-light);">
       <div class="field" style="margin-bottom:0;">
         <label for="serum-k">實測血鉀 (Serum K) <small>選填</small></label>
         <div class="input-wrap">
@@ -1311,7 +1356,7 @@
     </div>
 
     <!-- 5A. 3% NaCl 床邊泡製換算器（雙模式） -->
-    <div style="background:#f8fafc; border:1.5px solid var(--line); border-radius:12px; padding:15px; margin-bottom:16px;">
+    <div class="step5-block step5-mix" style="background:#f8fafc; border:1.5px solid var(--line); border-radius:12px; padding:15px; margin-bottom:16px;">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
         <h3 style="margin:0; font-size:1.03rem; color:var(--navy);">🧪 5A. 3% NaCl 高張鹽水床邊泡製換算器（以 0.9% NaCl ＋ 10% NaCl 20 mL/amp 調配）</h3>
         <button type="button" class="btn-sm" id="btn-reset-mix" data-advanced>重設為標準 6 支快泡法 (3.00%)</button>
@@ -1389,7 +1434,7 @@
     </div>
 
     <!-- 5B. MDCalc #480 (Adrogué-Madias) 輸液速率計算機 -->
-    <div style="background:#fff; border:1.5px solid var(--line); border-radius:12px; padding:15px; margin-bottom:16px;">
+    <div class="step5-block step5-rate" style="background:#fff; border:1.5px solid var(--line); border-radius:12px; padding:15px; margin-bottom:16px;">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
         <h3 style="margin:0; font-size:1.03rem; color:var(--navy);">💧 5B. 點滴輸注速率計算機 (Adrogué-Madias Formula / MDCalc #480 擴充版)</h3>
         <button type="button" class="btn-sm" id="btn-sync-quota">帶入 Step 1 剩餘 24h 建議目標升幅</button>
@@ -1470,7 +1515,7 @@
     </div>
 
     <!-- 5C. 過度矯正救援計算機 (Overcorrection Rescue: D5W + DDAVP) -->
-    <div style="background:#fff5f5; border:1.5px solid var(--red-bd); border-radius:12px; padding:15px;">
+    <div class="step5-block step5-rescue" style="background:#fff5f5; border:1.5px solid var(--red-bd); border-radius:12px; padding:15px;">
       <h3 style="margin:0 0 8px; font-size:1.03rem; color:var(--red);">🛟 5C. 過度矯正降鈉救援計算機 (Overcorrection Rescue：D5W 自由水 ＋ Desmopressin DDAVP)</h3>
       <p style="margin:0 0 10px; font-size:0.84rem; color:var(--body);">
         適用情境：當 24h 血鈉升幅已超過安全上限（高風險 &gt; 6–8 mEq/L、一般慢性 &gt; 8–10 mEq/L），或治療中突發大量水利尿（UOP &gt; 100–200 mL/h）需立即踩煞車並將血鈉溫和調降回安全上限內。
@@ -1908,21 +1953,29 @@
       const p = step1.activeStepProtocol;
       let bolusMathHtml = "";
       if (step1.bolus100 && step1.bolus150) {
+        // 與 na.js activeRegimenBolus 相同：US → 100 mL；SALSA 有體重 → 2 mL/kg，否則 150 mL；ESE → 150 mL
+        const activeBolusKey =
+          step1.regimen.id === "us_2013"
+            ? "100"
+            : step1.regimen.id === "salsa_2021" && step1.bolus2MlKg
+              ? "2mlkg"
+              : "150";
+        const activeClass = (key) => (key === activeBolusKey ? " is-active-regimen" : "");
         bolusMathHtml = `
           <div class="kpi-row" style="margin:10px 0;">
-            <div class="kpi-card">
+            <div class="kpi-card${activeClass("100")}" data-bolus="100">
               <div class="kpi-label">單次 100 mL 3% NaCl (US)</div>
               <div class="kpi-val">+${step1.bolus100.deltaNaFinite.toFixed(2)} mEq/L</div>
               <div class="kpi-sub">有限體積公式 V(C−S)/(W+V)</div>
             </div>
-            <div class="kpi-card">
+            <div class="kpi-card${activeClass("150")}" data-bolus="150">
               <div class="kpi-label">單次 150 mL 3% NaCl (ESE)</div>
               <div class="kpi-val">+${step1.bolus150.deltaNaFinite.toFixed(2)} mEq/L</div>
               <div class="kpi-sub">2 次共 300 mL (有限體積)：+${(step1.bolus300 ? step1.bolus300.deltaNaFinite : step1.bolus150.deltaNaFinite * 2).toFixed(2)} mEq/L</div>
             </div>
             ${
               step1.bolus2MlKg
-                ? `<div class="kpi-card">
+                ? `<div class="kpi-card${activeClass("2mlkg")}" data-bolus="2mlkg">
                     <div class="kpi-label">2 mL/kg = ${step1.bolus2MlKg.bolusMl} mL (SALSA)</div>
                     <div class="kpi-val">+${step1.bolus2MlKg.deltaNaFinite.toFixed(2)} mEq/L</div>
                     <div class="kpi-sub">依體重計算單次預期升幅</div>

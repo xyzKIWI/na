@@ -286,6 +286,14 @@
     font-size: 0.78rem;
     color: var(--muted);
   }
+  .hts-dose .hts-bolus {
+    margin-top: 10px;
+    padding: 8px 10px;
+    border: 1px solid var(--red-bd);
+    border-radius: 9px;
+    background: var(--red-bg);
+  }
+  .hts-dose .hts-bolus .hts-line:first-child { margin-top: 0; color: var(--red); }
   body.quick-mode .step5-hts { order: 0; }
 
   /* 快速模式：只顯示目前方案的 Bolus 試算卡 */
@@ -1719,6 +1727,7 @@
     calculateInfusionPlan,
     calculateOvercorrectionRescue,
     calculateSodiumDeficit,
+    calculateWeightBasedInfusionRange,
     createSessionEvaluationStore,
   } from "./na.js";
 
@@ -2009,7 +2018,7 @@
       categoryId: step34.primaryCategory?.id || null,
     });
     renderInfusionPlan(infusionPlan, tbwResult);
-    renderHtsDose(step1, infusionPlan, tbwResult, serumNa);
+    renderHtsDose(step1, infusionPlan, tbwResult, serumNa, weightKg);
 
     // 7. Step 5C 過度矯正救援計算機
     const rescueCurrentNa =
@@ -2470,36 +2479,31 @@
     }
   }
 
-  // 商業 3% NaCl 建議劑量：只彙整既有計算結果（Step 1 Bolus、5B Adrogué-Madias 速率、MDCalc #95 鈉缺失量）
-  function renderHtsDose(step1, plan, tbwResult, serumNa) {
+  // 商業 3% NaCl 建議劑量：以 pump 連續輸注為主，嚴重症狀才另列急救 Bolus（只彙整既有計算結果）
+  function renderHtsDose(step1, plan, tbwResult, serumNa, weightKg) {
     const box = $("hts-dose-box");
     const lines = [];
 
-    if (step1.isEmergencyBolusIndicated && step1.activeStepProtocol) {
-      const bolus = step1.activeRegimenBolus;
-      lines.push(`<p class="hts-line">🚨 <b>急症 Bolus</b>（${step1.regimen.name}）：<span class="hts-big">${step1.activeStepProtocol.title}</span></p>`);
-      if (bolus) {
-        lines.push(`<p class="hts-line">本病患單次 <b>${bolus.bolusMl} mL</b> → 預期血鈉 <b>+${bolus.deltaNaFinite.toFixed(1)} mEq/L</b>（有限體積公式）</p>`);
-      }
-      lines.push(`<p class="hts-note">${step1.activeStepProtocol.repeatRule}</p>`);
-    } else {
-      lines.push(`<p class="hts-line">🟢 未勾選中度或嚴重症狀，未啟動急症 Bolus 試算（症狀分級見 Step 1）。</p>`);
-    }
-
     if (!plan.isValid) {
-      lines.push(`<p class="hts-line">💧 <b>連續輸注</b>：${plan.error}</p>`);
+      lines.push(`<p class="hts-line">💧 <b>Pump 連續輸注</b>：${plan.error}</p>`);
     } else {
       const hts = plan.allFluidsTable.find((f) => f.key === "hypertonic_3");
       const target = `${plan.targetDeltaNaMeqL >= 0 ? "+" : ""}${plan.targetDeltaNaMeqL.toFixed(1)} mEq/L / ${plan.timeHours} h`;
       if (hts.status === "achievable" && hts.rateMlPerHour !== null) {
-        lines.push(`<p class="hts-line">💧 <b>連續輸注</b>（目標 ${target}）：<span class="hts-big">${hts.rateMlPerHour.toFixed(1)} mL/h</span>，總量 ${hts.totalVolumeMl.toFixed(0)} mL</p>`);
+        lines.push(`<p class="hts-line">💧 <b>Pump 連續輸注</b>（目標 ${target}）：<span class="hts-big">${hts.rateMlPerHour.toFixed(1)} mL/h</span>，總量 ${hts.totalVolumeMl.toFixed(0)} mL</p>`);
         lines.push(`<p class="hts-note">Adrogué-Madias 公式，與 MDCalc #480、MSD 計算機相同：速率 = 每小時目標升幅 × (TBW + 1) ÷ (513 + K − Na) × 1000；${tbwResult.description}。目標與時間可在下方 5B 調整。</p>`);
       } else {
-        lines.push(`<p class="hts-line">💧 <b>連續輸注</b>（目標 ${target}）：${hts.statusMessage}</p>`);
+        lines.push(`<p class="hts-line">💧 <b>Pump 連續輸注</b>（目標 ${target}）：${hts.statusMessage}</p>`);
       }
       plan.warnings
         .filter((w) => /剩餘安全上限/.test(w))
         .forEach((w) => lines.push(`<p class="hts-line" style="color:var(--red); font-weight:700;">${w}</p>`));
+
+      const usRange = calculateWeightBasedInfusionRange({ weightKg });
+      if (usRange) {
+        lines.push(`<p class="hts-line">📏 <b>美國 2013 共識中度症狀參考</b>：0.5–2 mL/kg/h ＝ 本病患 <b>${usRange.minMlPerHour.toFixed(0)}–${usRange.maxMlPerHour.toFixed(0)} mL/h</b></p>`);
+        lines.push(`<p class="hts-note">出處：Verbalis 2013 共識，經 Hoorn & Zietse, JASN 2017 Table 2 轉引；與上方 Adrogué-Madias 速率算法不同，僅供對照。</p>`);
+      }
 
       const deficit = calculateSodiumDeficit({
         tbwL: plan.tbwL,
@@ -2510,6 +2514,15 @@
       if (deficit) {
         lines.push(`<p class="hts-note">對照 MDCalc #95 鈉缺失量：TBW × ${plan.targetDeltaNaMeqL.toFixed(1)} = ${deficit.deficitMeq.toFixed(0)} mEq ≈ 3% NaCl ${deficit.infusateVolumeMl.toFixed(0)} mL（未計入點滴本身的水分，所以比上方 Adrogué-Madias 總量少；兩種算法不同，僅供對照）。</p>`);
       }
+    }
+
+    if (step1.effectiveSeverity === "severe" && step1.activeStepProtocol) {
+      const bolus = step1.activeRegimenBolus;
+      lines.push(`<div class="hts-bolus"><p class="hts-line">🚨 <b>嚴重症狀急救 Bolus</b>（${step1.regimen.name}）：<b>${step1.activeStepProtocol.title}</b></p>`);
+      if (bolus) {
+        lines.push(`<p class="hts-line">本病患單次 <b>${bolus.bolusMl} mL</b> → 預期血鈉 <b>+${bolus.deltaNaFinite.toFixed(1)} mEq/L</b>（有限體積公式）</p>`);
+      }
+      lines.push(`<p class="hts-note">${step1.activeStepProtocol.repeatRule}</p></div>`);
     }
 
     box.innerHTML = `<h3>💉 商業 3% NaCl（513 mEq/L）建議劑量</h3>${lines.join("")}`;

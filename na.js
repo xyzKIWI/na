@@ -1069,6 +1069,7 @@ export function evaluateStep3And4UrineAndClassification({
 
   // 2. 計算進階指標：FE_Urea、FE_Uric Acid、Urine Cl、Serum Uric Acid
   let feUrea = null;
+  let feUreaCmp = null;
   let feUreaInterpretation = null;
   let feUreaUnitNote = null;
   const sCr = feInputs.serumCr;
@@ -1099,10 +1100,12 @@ export function evaluateStep3And4UrineAndClassification({
     }
 
     feUrea = ((normalizedUrineUrea * sCr) / (sUrea * uCr)) * 100;
-    if (feUrea < 35) {
+    // 判讀用四捨五入到 1e-6，避免浮點誤差（如 55.00000000000001）讓恰為切點的值落到錯誤區間
+    feUreaCmp = Math.round(feUrea * 1e6) / 1e6;
+    if (feUreaCmp < 35) {
       feUreaInterpretation =
         "FE_Urea < 35%：支持有效動脈血容積不足／腎前性低灌流（如脫水、心衰、肝硬化），即使使用利尿劑致 U_Na 假性偏高亦具參考價值。（註：屬輔助證據，請結合臨床）";
-    } else if (feUrea > 55) {
+    } else if (feUreaCmp > 55) {
       feUreaInterpretation =
         "FE_Urea > 55%：支持正常血容積（如 SIADH）或腎性鹽分流失。（註：屬輔助證據，不可單憑此數值確診 SIADH）";
     } else {
@@ -1126,10 +1129,11 @@ export function evaluateStep3And4UrineAndClassification({
     uUa >= 0
   ) {
     feUa = ((uUa * sCr) / (sUa * uCr)) * 100;
-    if (feUa > 12) {
+    const feUaCmp = Math.round(feUa * 1e6) / 1e6;
+    if (feUaCmp > 12) {
       feUaInterpretation =
         "FE_UA > 12%：支持 SIADH 或腦／腎耗鹽症候群 (CSW/RSW)，即使患者正在使用利尿劑亦支持 SIADH/CSW。（矯正血鈉後：SIADH 之 FE_UA 會降回 < 11%，CSW 則持續 > 11%）";
-    } else if (feUa < 4) {
+    } else if (feUaCmp < 4) {
       feUaInterpretation = "FE_UA < 4%：支持有效動脈血容積不足／腎前性低血容。";
     } else {
       feUaInterpretation =
@@ -1224,7 +1228,7 @@ export function evaluateStep3And4UrineAndClassification({
           primaryCategory = HYPOTONIC_CATEGORIES.cat2_hypovol_high_una;
           candidateCategories = [HYPOTONIC_CATEGORIES.cat2_hypovol_high_una];
           activeFlowNodes.push("node_cat2");
-          if (confounders.onDiuretics || confounders.vomitingNg || (feUrea !== null && feUrea < 35) || (Number.isFinite(uCl) && uCl < 20)) {
+          if (confounders.onDiuretics || confounders.vomitingNg || (feUreaCmp !== null && feUreaCmp < 35) || (Number.isFinite(uCl) && uCl < 20)) {
             candidateCategories.push(HYPOTONIC_CATEGORIES.cat1_hypovol_low_una);
           }
         }

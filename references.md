@@ -1,7 +1,7 @@
 # 低血鈉（Hyponatremia）臨床診斷演算法、公式與實證文獻彙整
 
 > **適用族群**：成人急診與住院患者（Adult ED / Inpatient）  
-> **資料最後校對**：2026-10-25
+> **資料最後校對**：2026-10-26
 
 ---
 
@@ -10,7 +10,7 @@
 1. **歐洲臨床實踐指引 (ESE / ESICM / ERA-EDTA 2014)**
    - Spasovski G, Vanholder R, Allolio B, et al. *Clinical practice guideline on diagnosis and treatment of hyponatraemia.* **Eur J Endocrinol.** 2014;170(3):G1–G47. [Full Text](https://academic.oup.com/ejendo/article/170/3/G1/6668028)
    - **重點**：
-     - 將症狀分為「嚴重症狀（抽搐、昏迷、深度嗜睡、心肺窘迫）」與「中度嚴重症狀（嘔吐、混亂、步態不穩）」。
+     - 將症狀分為「嚴重症狀（嘔吐、心肺窘迫、深度嗜睡、抽搐、昏迷）」與「中度嚴重症狀（噁心但未嘔吐、混亂、頭痛）」（Table 5）。工具另將步態不穩列為中度。
      - 嚴重症狀：立即輸注 **3% NaCl 150 mL（或 2 mL/kg）over 20 min**，抽血測 Na 同時給予第 2 次 150 mL，目標首小時提升 5 mmol/L。
      - 診斷演算法優先使用 **Urine Osmolality ($\le 100$ vs $> 100\text{ mOsm/kg}$)** 與 **Urine Sodium ($\le 30$ vs $> 30\text{ mmol/L}$)**，因臨床理學檢查評估體液容積敏感度與特異度偏低。
      - 安全矯正上限：首 24 小時 $\le 10\text{ mmol/L}$，其後每 24 小時 $\le 8\text{ mmol/L}$。

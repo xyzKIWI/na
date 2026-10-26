@@ -26,7 +26,7 @@ import {
 // [WATSON80] Watson PE, et al. Am J Clin Nutr 1980;33:27–39.
 // [KATZ73]   Katz MA. N Engl J Med 1973;289:843–844.  [HILLIER99] Hillier TA, et al. Am J Med 1999;106:399–403.
 // [HOORN17]  Hoorn EJ, Zietse R. J Am Soc Nephrol 2017;28:1340–1349. doi:10.1681/ASN.2016101139（Table 2 美國／歐洲指引對照）
-// [SALSA-P]  Baek SH, et al. SALSA 試驗計畫書. Trials 2017. doi:10.1186/s13063-017-1865-z
+// [SALSA-P]  Lee A, et al. SALSA 試驗計畫書. Trials 2017;18(1):147. doi:10.1186/s13063-017-1865-z
 
 const close = (actual, expected, tolerance, message) =>
   assert.ok(

@@ -28,12 +28,12 @@
 | WATSON80 | Watson PE, et al. *Am J Clin Nutr* 1980;33:27–39 | 公式係數（與 `references.md` 相同） |
 | KATZ73／HILLIER99 | Katz MA. *NEJM* 1973;289:843；Hillier TA, et al. *Am J Med* 1999;106:399 | 每 100 mg/dL 校正 1.6／2.4 |
 | HOORN17 | Hoorn EJ, Zietse R. Diagnosis and treatment of hyponatremia: compilation of the guidelines. *J Am Soc Nephrol* 2017;28:1340–1349. [doi:10.1681/ASN.2016101139](https://doi.org/10.1681/ASN.2016101139)（PMC5407738） | 核對全文 Table 2（美國 2013 與歐洲 2014 指引對照表）與正文 |
-| SALSA-P | Baek SH, et al. SALSA 試驗計畫書，*Trials* 2017. [doi:10.1186/s13063-017-1865-z](https://doi.org/10.1186/s13063-017-1865-z)（PMID 28356136，PMC5372334） | 核對 Rapid intermittent bolus 組劑量 |
+| SALSA-P | Lee A, et al. SALSA 試驗計畫書，*Trials* 2017;18(1):147. [doi:10.1186/s13063-017-1865-z](https://doi.org/10.1186/s13063-017-1865-z)（PMID 28356136，PMC5372334） | 核對 Rapid intermittent bolus 組劑量 |
 | SALSA21 | Baek SH, et al. *JAMA Intern Med* 2021;181(1):81–92. [doi:10.1001/jamainternmed.2020.5519](https://doi.org/10.1001/jamainternmed.2020.5519)（PMC7589081） | 核對 Methods 之 relowering 條件與劑量 |
 
 Adrogué & Madias *NEJM* 2000 原文沒有開放全文，無法逐字核對，所以 Adrogué–Madias 範例改用同作者 2012 年 JASN 綜論中可驗證的 Table 2 數值。
 
-美國 2013 專家共識（Verbalis JG, et al. *Am J Med* 2013）原文網站拒絕存取，改以 HOORN17 Table 2 的逐列對照作為美國指引數值的出處。
+美國 2013 專家共識（Verbalis JG, et al. *Am J Med* 2013;126(10 Suppl 1):S1–S42. [doi:10.1016/j.amjmed.2013.07.006](https://doi.org/10.1016/j.amjmed.2013.07.006)，PMID 24074529）原文網站拒絕存取，改以 HOORN17 Table 2 的逐列對照作為美國指引數值的出處。
 
 ---
 

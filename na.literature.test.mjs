@@ -678,6 +678,18 @@ test("FE_Urea 判讀分段：< 35、35–55、> 55（[ESE2014] Table 6）；FE_U
   assert.match(uaFloat.feUaInterpretation, /4–12%/);
 });
 
+test("FE_Urea 恰為 35%（浮點得 34.99999999999999）：判讀文字與 Cat 2 候選分類用同一比較值", () => {
+  // SCr 1.1、BUN 10、UCr 50、UUN 159.0909… → 數學上 35%，原始乘除為 34.99999999999999
+  const feInputs = { serumCr: 1.1, urineCr: 50, serumUrea: 10, urineUrea: 159.09090909090907 };
+  const r = step34({ urineOsm: 400, urineNa: 60, volumeStatus: "hypovolemic", feInputs });
+  assert.ok(r.feUrea < 35);
+  assert.match(r.feUreaInterpretation, /35–55%/);
+  assert.deepEqual(r.candidateCategories.map((c) => c.id), ["cat2_hypovol_high_una"]);
+  // 對照：真的 < 35% 時才把 Cat 1 加入候選
+  const low = step34({ urineOsm: 400, urineNa: 60, volumeStatus: "hypovolemic", feInputs: { ...feInputs, urineUrea: 150 } });
+  assert.ok(low.candidateCategories.some((c) => c.id === "cat1_hypovol_low_una"));
+});
+
 test("FE 缺值：任一必要值缺漏、為 0 或 NaN 就不計算", () => {
   const full = { serumCr: 1, urineCr: 100, serumUrea: 10, urineUrea: 300 };
   for (const key of Object.keys(full)) {

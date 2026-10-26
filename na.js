@@ -1069,6 +1069,7 @@ export function evaluateStep3And4UrineAndClassification({
 
   // 2. 計算進階指標：FE_Urea、FE_Uric Acid、Urine Cl、Serum Uric Acid
   let feUrea = null;
+  let feUreaCmp = null;
   let feUreaInterpretation = null;
   let feUreaUnitNote = null;
   const sCr = feInputs.serumCr;
@@ -1100,7 +1101,7 @@ export function evaluateStep3And4UrineAndClassification({
 
     feUrea = ((normalizedUrineUrea * sCr) / (sUrea * uCr)) * 100;
     // 判讀用四捨五入到 1e-6，避免浮點誤差（如 55.00000000000001）讓恰為切點的值落到錯誤區間
-    const feUreaCmp = Math.round(feUrea * 1e6) / 1e6;
+    feUreaCmp = Math.round(feUrea * 1e6) / 1e6;
     if (feUreaCmp < 35) {
       feUreaInterpretation =
         "FE_Urea < 35%：支持有效動脈血容積不足／腎前性低灌流（如脫水、心衰、肝硬化），即使使用利尿劑致 U_Na 假性偏高亦具參考價值。（註：屬輔助證據，請結合臨床）";
@@ -1227,7 +1228,7 @@ export function evaluateStep3And4UrineAndClassification({
           primaryCategory = HYPOTONIC_CATEGORIES.cat2_hypovol_high_una;
           candidateCategories = [HYPOTONIC_CATEGORIES.cat2_hypovol_high_una];
           activeFlowNodes.push("node_cat2");
-          if (confounders.onDiuretics || confounders.vomitingNg || (feUrea !== null && feUrea < 35) || (Number.isFinite(uCl) && uCl < 20)) {
+          if (confounders.onDiuretics || confounders.vomitingNg || (feUreaCmp !== null && feUreaCmp < 35) || (Number.isFinite(uCl) && uCl < 20)) {
             candidateCategories.push(HYPOTONIC_CATEGORIES.cat1_hypovol_low_una);
           }
         }

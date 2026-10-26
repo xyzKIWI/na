@@ -530,3 +530,14 @@ test("FE_Urea interpretation uses the ESE 2014 Table 6 SIAD cutoff of > 55%", ()
   assert.match(fe(560), /> 55%/); // FE_Urea 56%
   assert.match(fe(349), /< 35%/);
 });
+
+test("matches MDCalc #480 example: elderly female 60 kg, Na 110, 3% saline, 0.33 mmol/L/hr → 23 mL/hr", () => {
+  // MDCalc #480 Sodium Correction Rate in Hyponatremia（臨床端提供之頁面截圖，2026-10-26）
+  const tbw = calculateTbw({ weightKg: 60, sex: "female", ageYears: 70 });
+  assert.equal(tbw.factor, 0.45);
+  const plan = calculateInfusionPlan({ serumNa: 110, tbwL: tbw.tbwL, targetDeltaNaMeqL: 0.33, timeHours: 1 });
+  assert.equal(Math.round(plan.selectedFluid.rateMlPerHour), 23);
+  // 同一速率跑 24 小時約 +8 mmol/L，即 MDCalc 頁面提示的 8 mmol/L/day
+  const day = calculateInfusionPlan({ serumNa: 110, tbwL: tbw.tbwL, targetDeltaNaMeqL: 8, timeHours: 24 });
+  assert.equal(Math.round(day.selectedFluid.rateMlPerHour), 23);
+});

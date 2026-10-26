@@ -538,3 +538,14 @@ test("calculateWeightBasedInfusionRange converts US 2013 0.5–2 mL/kg/h to mL/h
   assert.equal(calculateWeightBasedInfusionRange({ weightKg: null }), null);
   assert.equal(calculateWeightBasedInfusionRange({ weightKg: 0 }), null);
 });
+
+test("matches MDCalc #480 example: elderly female 60 kg, Na 110, 3% saline, 0.33 mmol/L/hr → 23 mL/hr", () => {
+  // MDCalc #480 Sodium Correction Rate in Hyponatremia（臨床端提供之頁面截圖，2026-10-26）
+  const tbw = calculateTbw({ weightKg: 60, sex: "female", ageYears: 70 });
+  assert.equal(tbw.factor, 0.45);
+  const plan = calculateInfusionPlan({ serumNa: 110, tbwL: tbw.tbwL, targetDeltaNaMeqL: 0.33, timeHours: 1 });
+  assert.equal(Math.round(plan.selectedFluid.rateMlPerHour), 23);
+  // 同一速率跑 24 小時約 +8 mmol/L，即 MDCalc 頁面提示的 8 mmol/L/day
+  const day = calculateInfusionPlan({ serumNa: 110, tbwL: tbw.tbwL, targetDeltaNaMeqL: 8, timeHours: 24 });
+  assert.equal(Math.round(day.selectedFluid.rateMlPerHour), 23);
+});

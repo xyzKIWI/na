@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 import {
   parseOptionalNumber,
@@ -256,15 +257,12 @@ test("Bolus 方案數值與 [ESE2014] §7.1.1／§7.2.1.4 一致：150 mL 3% ove
   assert.equal(ese.moderate.infusionMinutes, 20);
 });
 
-test("SALSA 方案為 2 mL/kg；Step 1 以 Math.round(體重×2) 計算體積並套用有限體積公式", () => {
-  assert.equal(BOLUS_REGIMENS.salsa_2021.severe.weightBasedMlPerKg, 2);
+test("[SALSA-P] 中度症狀 2 mL/kg over 20 min；Step 1 以 Math.round(體重×2) 計算體積並套用有限體積公式", () => {
+  // SALSA-P："moderately severe symptoms … 2 mL/kg 3% hypertonic saline over 20 min"
   assert.equal(BOLUS_REGIMENS.salsa_2021.moderate.weightBasedMlPerKg, 2);
-  const r = evaluateStep1Triage({ serumNa: 115, symptomSeverity: "severe", regimenKey: "salsa_2021", weightKg: 62.3, tbwL: 31.15 });
+  const r = evaluateStep1Triage({ serumNa: 115, symptomSeverity: "moderate", regimenKey: "salsa_2021", weightKg: 62.3, tbwL: 31.15 });
   assert.equal(r.activeRegimenBolus.bolusMl, 125);
   close(r.activeRegimenBolus.deltaNaFinite, (0.125 * (513.3 - 115)) / (31.15 + 0.125), 1e-9);
-  // 未填體重時 SALSA 退回 150 mL 計算
-  const noWeight = evaluateStep1Triage({ serumNa: 115, symptomSeverity: "severe", regimenKey: "salsa_2021", tbwL: 30 });
-  assert.equal(noWeight.activeRegimenBolus.bolusMl, 150);
 });
 
 test("Step 1 上限與 [ESE2014] §7.1.2.4／§7.2.1.6 一致：首 24h ≤ 10、其後每 24h ≤ 8 mmol/L", () => {
@@ -296,14 +294,40 @@ test(
   },
 );
 
+// [SALSA-P] 與工具不一致的四點各自獨立成 todo，一點修好不會被其他點擋住（見 TEST_REPORT.md 不一致 #4）。
+// SALSA-P："severe symptoms … 4 mL/kg 3% hypertonic saline over 40 min (200 mL … for unknown body weight)"；
+// "moderately severe symptoms … 2 mL/kg … over 20 min (100 mL … for unknown body weight)"
 test(
-  "[SALSA-P] 嚴重症狀 4 mL/kg over 40 min；未知體重時中度 100 mL、嚴重 200 mL",
-  { todo: "工具 SALSA 嚴重症狀為 2 mL/kg over 20 min，未填體重一律 150 mL（見 TEST_REPORT.md 不一致 #4）" },
+  "[SALSA-P] 嚴重症狀 4 mL/kg",
+  { todo: "工具 SALSA 嚴重症狀為 2 mL/kg（見 TEST_REPORT.md 不一致 #4）" },
   () => {
     assert.equal(BOLUS_REGIMENS.salsa_2021.severe.weightBasedMlPerKg, 4);
+  },
+);
+
+test(
+  "[SALSA-P] 嚴重症狀 over 40 min",
+  { todo: "工具 SALSA 嚴重症狀為 over 20 min（見 TEST_REPORT.md 不一致 #4）" },
+  () => {
     assert.equal(BOLUS_REGIMENS.salsa_2021.severe.infusionMinutes, 40);
+  },
+);
+
+test(
+  "[SALSA-P] 未知體重時嚴重症狀 200 mL",
+  { todo: "工具未填體重時退回 150 mL（見 TEST_REPORT.md 不一致 #4）" },
+  () => {
     const noWeight = evaluateStep1Triage({ serumNa: 115, symptomSeverity: "severe", regimenKey: "salsa_2021", tbwL: 30 });
     assert.equal(noWeight.activeRegimenBolus.bolusMl, 200);
+  },
+);
+
+test(
+  "[SALSA-P] 未知體重時中度症狀 100 mL",
+  { todo: "工具未填體重時退回 150 mL（見 TEST_REPORT.md 不一致 #4）" },
+  () => {
+    const noWeight = evaluateStep1Triage({ serumNa: 115, symptomSeverity: "moderate", regimenKey: "salsa_2021", tbwL: 30 });
+    assert.equal(noWeight.activeRegimenBolus.bolusMl, 100);
   },
 );
 
@@ -324,11 +348,25 @@ test("Step 1 主要 ODS 風險因子（Na ≤ 105、K < 3.5、酒精、營養不
 
 test("Step 1 症狀分級：勾選嚴重症狀自動升級；勾選中度症狀不會降級已選的嚴重", () => {
   assert.equal(evaluateStep1Triage({ severeSymptomsList: ["seizure"] }).effectiveSeverity, "severe");
-  assert.equal(evaluateStep1Triage({ moderateSymptomsList: ["vomiting"] }).effectiveSeverity, "moderate");
-  assert.equal(evaluateStep1Triage({ symptomSeverity: "severe", moderateSymptomsList: ["vomiting"] }).effectiveSeverity, "severe");
+  assert.equal(evaluateStep1Triage({ moderateSymptomsList: ["confusion"] }).effectiveSeverity, "moderate");
+  assert.equal(evaluateStep1Triage({ symptomSeverity: "severe", moderateSymptomsList: ["confusion"] }).effectiveSeverity, "severe");
   const mild = evaluateStep1Triage({ serumNa: 128 });
   assert.equal(mild.isEmergencyBolusIndicated, false);
   assert.equal(mild.activeStepProtocol, null);
+});
+
+test("[ESE2014] Table 5：嘔吐屬嚴重症狀，噁心未嘔吐才屬中度（index.html 勾選框分組）", () => {
+  // ESE2014 Table 5：Moderately severe = nausea without vomiting、confusion、headache；
+  // Severe = vomiting、cardio-respiratory distress、abnormal and deep somnolence、seizures、coma (GCS ≤ 8)
+  const html = readFileSync(new URL("./index.html", import.meta.url), "utf8");
+  const boxes = (cls) => [...html.matchAll(new RegExp(`class="${cls}" value="([^"]+)"`, "g"))].map((m) => m[1]);
+  const severe = boxes("sym-severe-cb");
+  const moderate = boxes("sym-mod-cb");
+  assert.ok(severe.some((v) => /Vomiting/.test(v)), "嘔吐應在嚴重症狀");
+  assert.ok(!moderate.some((v) => /嘔吐/.test(v) && !/未嘔吐/.test(v)), "中度症狀不應含嘔吐");
+  assert.ok(moderate.some((v) => /未嘔吐/.test(v)), "中度症狀應有噁心（未嘔吐）");
+  // 勾選嘔吐即升為 severe
+  assert.equal(evaluateStep1Triage({ severeSymptomsList: severe.filter((v) => /Vomiting/.test(v)) }).effectiveSeverity, "severe");
 });
 
 test("Step 1 24h 配額：直接輸入升幅優先於起始 Na；邊界 = 上限時為 reached、超過才 exceeded", () => {
@@ -626,11 +664,18 @@ test("FE_Urea 判讀分段：< 35、35–55、> 55（[ESE2014] Table 6）；FE_U
   assert.match(fe(350).feUreaInterpretation, /35–55%/);
   assert.match(fe(540).feUreaInterpretation, /35–55%/);
   assert.match(fe(551).feUreaInterpretation, /> 55%/);
-  // 恰為 55%（urineUrea 550）浮點運算得 55.00000000000001，故不測精確邊界
+  // 恰為 55%：原始乘除得 55.00000000000001，判讀須仍歸 35–55%（不可誤判 > 55%）
+  assert.equal(fe(550).feUrea, 55.00000000000001);
+  assert.match(fe(550).feUreaInterpretation, /35–55%/);
+  assert.match(fe(350).feUreaInterpretation, /35–55%/);
   const ua = (urineUa) => step34({ urineOsm: 400, urineNa: 40, feInputs: { serumCr: 1, urineCr: 100, serumUa: 1, urineUa } });
   assert.match(ua(3.9).feUaInterpretation, /< 4%/);
   assert.match(ua(12).feUaInterpretation, /4–12%/);
   assert.match(ua(12.1).feUaInterpretation, /> 12%/);
+  // 恰為 12% 但浮點得 12.000000000000002（尿酸 4.2／血尿酸 0.35）→ 仍歸 4–12%
+  const uaFloat = step34({ urineOsm: 400, urineNa: 40, feInputs: { serumCr: 1, urineCr: 100, serumUa: 0.35, urineUa: 4.2 } });
+  assert.equal(uaFloat.feUa, 12.000000000000002);
+  assert.match(uaFloat.feUaInterpretation, /4–12%/);
 });
 
 test("FE 缺值：任一必要值缺漏、為 0 或 NaN 就不計算", () => {

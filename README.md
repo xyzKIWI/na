@@ -31,7 +31,7 @@
   - SALSA Randomized Clinical Trial (Baek et al., *JAMA Intern Med* 2021)
   - Adrogué & Madias (*NEJM* 2000)、Watson TBW (*Am J Clin Nutr* 1980)、Katz (1973) & Hillier (1999)
   - CJASN 2024 (Sterns RH)、NDT 2024 (Adrogué & Madias)、PMC13424767 (2026)
-- **資料最後校對**：2026-10-25
+- **資料最後校對**：2026-10-26
 - **校對方式**：逐條核對原始文獻切點與公式推導，並以 `na.test.mjs` 自動化單元測試驗證所有分類邊界、缺值、有限體積 Bolus、泡製濃度回代與防呆邏輯。
 
 ## 驗證

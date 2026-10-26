@@ -1668,24 +1668,6 @@ export function calculateSodiumDeficit({ tbwL, serumNa, targetNa, infusateMeqL =
 }
 
 /**
- * 美國 2013 專家共識中度症狀之 3% NaCl 連續輸注體重範圍（Hoorn & Zietse, JASN 2017 Table 2 轉引）
- * 0.5–2 mL/kg/h，換算為本病患 mL/h
- */
-export const US_2013_MODERATE_INFUSION_ML_PER_KG_H = { min: 0.5, max: 2 };
-
-export function calculateWeightBasedInfusionRange({
-  weightKg,
-  minMlPerKgH = US_2013_MODERATE_INFUSION_ML_PER_KG_H.min,
-  maxMlPerKgH = US_2013_MODERATE_INFUSION_ML_PER_KG_H.max,
-}) {
-  if (!Number.isFinite(weightKg) || weightKg <= 0) return null;
-  return {
-    minMlPerHour: weightKg * minMlPerKgH,
-    maxMlPerHour: weightKg * maxMlPerKgH,
-  };
-}
-
-/**
  * 產生去識別化臨床病歷摘要 (EMR Clinical Note)
  * 僅供臨床評估紀錄參考，不產生直接可照抄之未覆核醫囑
  */

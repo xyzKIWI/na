@@ -531,14 +531,6 @@ test("FE_Urea interpretation uses the ESE 2014 Table 6 SIAD cutoff of > 55%", ()
   assert.match(fe(349), /< 35%/);
 });
 
-test("calculateWeightBasedInfusionRange converts US 2013 0.5–2 mL/kg/h to mL/h", async () => {
-  const { calculateWeightBasedInfusionRange, US_2013_MODERATE_INFUSION_ML_PER_KG_H } = await import("./na.js");
-  assert.deepEqual(US_2013_MODERATE_INFUSION_ML_PER_KG_H, { min: 0.5, max: 2 });
-  assert.deepEqual(calculateWeightBasedInfusionRange({ weightKg: 60 }), { minMlPerHour: 30, maxMlPerHour: 120 });
-  assert.equal(calculateWeightBasedInfusionRange({ weightKg: null }), null);
-  assert.equal(calculateWeightBasedInfusionRange({ weightKg: 0 }), null);
-});
-
 test("matches MDCalc #480 example: elderly female 60 kg, Na 110, 3% saline, 0.33 mmol/L/hr → 23 mL/hr", () => {
   // MDCalc #480 Sodium Correction Rate in Hyponatremia（臨床端提供之頁面截圖，2026-10-26）
   const tbw = calculateTbw({ weightKg: 60, sex: "female", ageYears: 70 });

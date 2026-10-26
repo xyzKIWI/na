@@ -275,6 +275,24 @@
     font-size: 0.88rem;
     line-height: 1.6;
   }
+  .hts-dose .hts-input {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    margin-bottom: 6px;
+  }
+  .hts-dose .hts-input label { font-weight: 700; font-size: 0.88rem; }
+  .hts-dose .hts-input .input-wrap { max-width: 190px; }
+  .hts-dose .hts-result {
+    margin: 4px 0 0;
+    font-size: 1.9rem;
+    font-weight: 800;
+    color: var(--teal-dark);
+    font-variant-numeric: tabular-nums;
+  }
+  .hts-dose .hts-more { margin-top: 10px; font-size: 0.82rem; }
+  .hts-dose .hts-more summary { cursor: pointer; color: var(--muted); font-weight: 600; }
   .hts-dose .hts-big {
     font-size: 1.15rem;
     font-weight: 800;
@@ -1459,7 +1477,21 @@
     </div>
 
     <!-- 商業 3% NaCl 建議劑量（彙整 Step 1 Bolus 與 5B 速率） -->
-    <div class="step5-block step5-hts hts-dose" id="hts-dose-box"></div>
+    <div class="step5-block step5-hts hts-dose">
+      <h3>💉 商業 3% NaCl（513 mEq/L）Pump 速率</h3>
+      <div class="hts-input">
+        <label for="hts-rate-per-hour">目標每小時升幅</label>
+        <div class="input-wrap">
+          <input id="hts-rate-per-hour" type="number" min="0.05" max="2" step="0.01" value="0.33" inputmode="decimal">
+          <span class="unit">mEq/L/h</span>
+        </div>
+      </div>
+      <div id="hts-dose-box"></div>
+      <details class="hts-more">
+        <summary>公式與對照</summary>
+        <div id="hts-dose-more"></div>
+      </details>
+    </div>
 
     <!-- 5A. 3% NaCl 床邊泡製換算器（雙模式） -->
     <div class="step5-block step5-mix" data-advanced style="background:#f8fafc; border:1.5px solid var(--line); border-radius:12px; padding:15px; margin-bottom:16px;">
@@ -1728,7 +1760,6 @@
     calculateInfusionPlan,
     calculateOvercorrectionRescue,
     calculateSodiumDeficit,
-    calculateWeightBasedInfusionRange,
     createSessionEvaluationStore,
   } from "./na.js";
 
@@ -2019,7 +2050,7 @@
       categoryId: step34.primaryCategory?.id || null,
     });
     renderInfusionPlan(infusionPlan, tbwResult);
-    renderHtsDose(step1, infusionPlan, tbwResult, serumNa, weightKg);
+    const htsDose = renderHtsDose(step1, tbwResult, serumNa);
 
     // 7. Step 5C 過度矯正救援計算機
     const rescueCurrentNa =
@@ -2049,7 +2080,7 @@
       mixingResult,
       rescueResult,
     });
-    updateBottomBar(step1, step2, step34, infusionPlan, committed);
+    updateBottomBar(step1, step2, step34, htsDose, committed);
   }
 
   function renderStep1(step1) {
@@ -2480,40 +2511,52 @@
     }
   }
 
-  // 商業 3% NaCl 建議劑量：以 pump 連續輸注為主，嚴重症狀才另列急救 Bolus（只彙整既有計算結果）
-  function renderHtsDose(step1, plan, tbwResult, serumNa, weightKg) {
+  // 商業 3% NaCl pump 速率：輸入每小時升幅（同 MDCalc #480），以 Adrogué-Madias 算 mL/h；嚴重症狀才另列急救 Bolus
+  function renderHtsDose(step1, tbwResult, serumNa) {
+    let result = null;
     const box = $("hts-dose-box");
+    const more = $("hts-dose-more");
     const lines = [];
+    const moreLines = [];
+    const ratePerHour = parseOptionalNumber($("hts-rate-per-hour").value);
 
-    if (!plan.isValid) {
-      lines.push(`<p class="hts-line">💧 <b>Pump 連續輸注</b>：${plan.error}</p>`);
+    if (!Number.isFinite(ratePerHour) || ratePerHour <= 0) {
+      lines.push(`<p class="hts-line">請輸入大於 0 的每小時升幅（mEq/L/h）。</p>`);
     } else {
-      const hts = plan.allFluidsTable.find((f) => f.key === "hypertonic_3");
-      const target = `${plan.targetDeltaNaMeqL >= 0 ? "+" : ""}${plan.targetDeltaNaMeqL.toFixed(1)} mEq/L / ${plan.timeHours} h`;
-      if (hts.status === "achievable" && hts.rateMlPerHour !== null) {
-        lines.push(`<p class="hts-line">💧 <b>Pump 連續輸注</b>（目標 ${target}）：<span class="hts-big">${hts.rateMlPerHour.toFixed(1)} mL/h</span>，總量 ${hts.totalVolumeMl.toFixed(0)} mL</p>`);
-        lines.push(`<p class="hts-note">Adrogué-Madias 公式，與 MDCalc #480、MSD 計算機相同：速率 = 每小時目標升幅 × (TBW + 1) ÷ (513 + K − Na) × 1000；${tbwResult.description}。目標與時間可在下方 5B 調整。</p>`);
-      } else {
-        lines.push(`<p class="hts-line">💧 <b>Pump 連續輸注</b>（目標 ${target}）：${hts.statusMessage}</p>`);
-      }
-      plan.warnings
-        .filter((w) => /剩餘安全上限/.test(w))
-        .forEach((w) => lines.push(`<p class="hts-line" style="color:var(--red); font-weight:700;">${w}</p>`));
-
-      const usRange = calculateWeightBasedInfusionRange({ weightKg });
-      if (usRange) {
-        lines.push(`<p class="hts-line">📏 <b>美國 2013 共識中度症狀參考</b>：0.5–2 mL/kg/h ＝ 本病患 <b>${usRange.minMlPerHour.toFixed(0)}–${usRange.maxMlPerHour.toFixed(0)} mL/h</b></p>`);
-        lines.push(`<p class="hts-note">出處：Verbalis 2013 共識，經 Hoorn & Zietse, JASN 2017 Table 2 轉引；與上方 Adrogué-Madias 速率算法不同，僅供對照。</p>`);
-      }
-
-      const deficit = calculateSodiumDeficit({
-        tbwL: plan.tbwL,
+      // 以「每小時升幅 × 24 小時」計算，mL/h 與單小時計算相同，並可比對 24h 剩餘安全上限
+      const plan = calculateInfusionPlan({
         serumNa,
-        targetNa: serumNa + plan.targetDeltaNaMeqL,
-        infusateMeqL: hts.totalConcMeqL,
+        tbwL: tbwResult.tbwL,
+        infusateKey: "hypertonic_3",
+        targetDeltaNaMeqL: ratePerHour * 24,
+        timeHours: 24,
+        remainingHardLimit24h: step1.remainingHardLimit24h,
       });
-      if (deficit) {
-        lines.push(`<p class="hts-note">對照 MDCalc #95 鈉缺失量：TBW × ${plan.targetDeltaNaMeqL.toFixed(1)} = ${deficit.deficitMeq.toFixed(0)} mEq ≈ 3% NaCl ${deficit.infusateVolumeMl.toFixed(0)} mL（未計入點滴本身的水分，所以比上方 Adrogué-Madias 總量少；兩種算法不同，僅供對照）。</p>`);
+      if (!plan.isValid) {
+        lines.push(`<p class="hts-line">${plan.error}</p>`);
+      } else {
+        const hts = plan.selectedFluid;
+        if (hts.status === "achievable" && hts.rateMlPerHour !== null) {
+          result = { ratePerHour, rateMlPerHour: hts.rateMlPerHour };
+          lines.push(`<p class="hts-result">${hts.rateMlPerHour.toFixed(0)} mL/h</p>`);
+          lines.push(`<p class="hts-line">每小時升 ${ratePerHour} → 24 小時約 <b>+${(ratePerHour * 24).toFixed(1)} mEq/L</b>（24h 總量 ${hts.totalVolumeMl.toFixed(0)} mL）</p>`);
+        } else {
+          lines.push(`<p class="hts-line">${hts.statusMessage}</p>`);
+        }
+        plan.warnings
+          .filter((w) => /剩餘安全上限/.test(w))
+          .forEach((w) => lines.push(`<p class="hts-line" style="color:var(--red); font-weight:700;">${w}</p>`));
+
+        moreLines.push(`<p class="hts-note">Adrogué-Madias 公式，與 MDCalc #480、MSD 計算機相同：速率 = 每小時升幅 × (TBW + 1) ÷ (513 − Na) × 1000；${tbwResult.description}。</p>`);
+        const deficit = calculateSodiumDeficit({
+          tbwL: plan.tbwL,
+          serumNa,
+          targetNa: serumNa + ratePerHour * 24,
+          infusateMeqL: hts.totalConcMeqL,
+        });
+        if (deficit) {
+          moreLines.push(`<p class="hts-note">對照 MDCalc #95 鈉缺失量：TBW × ${(ratePerHour * 24).toFixed(1)} = ${deficit.deficitMeq.toFixed(0)} mEq ≈ 3% NaCl ${deficit.infusateVolumeMl.toFixed(0)} mL（未計入點滴本身的水分，所以比上方 24h 總量少；兩種算法不同，僅供對照）。</p>`);
+        }
       }
     }
 
@@ -2526,7 +2569,9 @@
       lines.push(`<p class="hts-note">${step1.activeStepProtocol.repeatRule}</p></div>`);
     }
 
-    box.innerHTML = `<h3>💉 商業 3% NaCl（513 mEq/L）建議劑量</h3>${lines.join("")}`;
+    box.innerHTML = lines.join("");
+    more.innerHTML = moreLines.join("") || `<p class="hts-note">輸入血鈉與體重後顯示公式與對照。</p>`;
+    return result;
   }
 
   function renderInfusionPlan(plan, tbwResult) {
@@ -2647,7 +2692,7 @@
     `;
   }
 
-  function updateBottomBar(step1, step2, step34, infusionPlan, committed) {
+  function updateBottomBar(step1, step2, step34, htsDose, committed) {
     const statusEl = $("bottom-live-status");
     if (!Number.isFinite(step1.serumNa)) {
       statusEl.textContent = "請輸入實測血鈉 (Serum Na) 與臨床症狀開始評估（共用電腦無痕模式）";
@@ -2662,8 +2707,9 @@
     if (step34.primaryCategory) {
       parts.push(`${step34.primaryCategory.code}`);
     }
-    if (infusionPlan.isValid && infusionPlan.selectedFluid?.rateMlPerHour !== null) {
-      parts.push(`${infusionPlan.selectedFluid.shortLabel} ${infusionPlan.selectedFluid.rateMlPerHour.toFixed(1)} mL/h`);
+    // 與 Step 5 頂端「3% NaCl Pump 速率」卡片同一個數字，避免頁面出現兩個不同速率
+    if (htsDose) {
+      parts.push(`3% NaCl ${htsDose.rateMlPerHour.toFixed(0)} mL/h (+${htsDose.ratePerHour}/h)`);
     }
     statusEl.textContent = parts.join("｜");
   }
@@ -2680,6 +2726,7 @@
       else if (input.id === "added-k-meql") input.value = "0";
       else if (input.id === "target-delta-na") input.value = "5";
       else if (input.id === "infusion-hours") input.value = "24";
+      else if (input.id === "hts-rate-per-hour") input.value = "0.33";
       else input.value = "";
     });
     document.querySelectorAll('input[type="checkbox"]').forEach((cb) => {

@@ -266,6 +266,25 @@
   .qdd-flow .fe.on { stroke: var(--teal); stroke-width: 2.6; marker-end: url(#qdd-arrow-on); }
   .qdd-flow .fe.assumed { stroke: var(--amber); stroke-width: 2.2; stroke-dasharray: 5 4; marker-end: url(#qdd-arrow-assumed); }
   .qdd-flow .legend { font-size: 10px; fill: #64748b; }
+  .qdd-cats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 6px;
+    margin-top: 10px;
+  }
+  .qdd-cat {
+    border: 1.2px solid #e2e8f0;
+    border-radius: 9px;
+    padding: 7px 10px;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: #64748b;
+    background: #fff;
+  }
+  .qdd-cat strong { display: block; color: var(--navy); font-size: 0.84rem; }
+  .qdd-cat.hit { background: var(--navy); border-color: var(--navy); color: #fff; }
+  .qdd-cat.hit strong { color: #fff; }
+  .qdd-cat.maybe { border: 1.6px dashed var(--teal); color: var(--body); }
 
   /* 急診下一步檢驗 */
   .labs-grid {
@@ -1237,6 +1256,7 @@
     </div>
     <label class="check-pill" style="max-width: 320px;"><input type="checkbox" id="qdd-diuretics"><span>💊 近期使用利尿劑</span></label>
     <div class="qdd-flow" id="qdd-flow" role="img" aria-label="低血鈉鑑別診斷流程圖，依輸入數值高亮目前路徑"></div>
+    <div class="qdd-cats" id="qdd-cats" aria-label="Category 1–6 分類說明"></div>
     <div id="qdd-result" class="alert-box teal" style="margin-top: 10px;"></div>
   </section>
 
@@ -2378,6 +2398,31 @@
     ["unaHigh", "high_cat2", "rail"], ["unaHigh", "high_cat3", "rail"], ["unaHigh", "high_cat6", "rail"],
   ];
 
+  // Cat 1–6 分類說明：直接讀取完整模式流程圖（fnode-*）的既有文字，兩處只維護一份
+  const QDD_CAT_SOURCES = [
+    ["cat1", "fnode-cat1"],
+    ["cat2", "fnode-cat2"],
+    ["cat3", "fnode-cat3"],
+    ["cat4", "fnode-uosm-low"],
+    ["cat5", "fnode-cat5"],
+    ["cat6", "fnode-cat6"],
+  ];
+
+  function buildQuickDdCats() {
+    $("qdd-cats").innerHTML = QDD_CAT_SOURCES.map(([cat, sourceId]) => {
+      const source = $(sourceId);
+      let title = source.querySelector("strong").textContent.trim();
+      let body = source.textContent.replace(source.querySelector("strong").textContent, "").trim();
+      if (cat === "cat4") {
+        // fnode-uosm-low 的格式為「…（ADH 受抑制）→ Category 4：病因」
+        const [physiology, causes] = body.split("→ Category 4：");
+        title = `Cat 4：${title}`;
+        body = `${physiology.trim()}；${causes.trim()}`;
+      }
+      return `<div class="qdd-cat" id="qdd-cat-${cat}"><strong>${title}</strong>${body}</div>`;
+    }).join("");
+  }
+
   function buildQuickDdFlow() {
     const node = Object.fromEntries(QDD_NODES.map((n) => [n.id, { h: 28, ...n }]));
     const edges = QDD_EDGES.map(([from, to, kind]) => {
@@ -2413,6 +2458,7 @@
     const flow = $("qdd-flow");
     flow.querySelectorAll(".fn").forEach((el) => el.classList.remove("on", "hit", "maybe"));
     flow.querySelectorAll(".fe").forEach((el) => el.classList.remove("on", "assumed"));
+    document.querySelectorAll(".qdd-cat").forEach((el) => el.classList.remove("hit", "maybe"));
     const on = (id) => $(`qn-${id}`)?.classList.add("on");
     const edge = (from, to, cls = "on") => $(`qe-${from}-${to}`)?.classList.add(cls);
 
@@ -2451,6 +2497,7 @@
         edge("uosm", "uosmLow");
         edge("uosmLow", "cat4");
         $("qn-cat4").classList.add("hit");
+        $("qdd-cat-cat4").classList.add("hit");
         return;
       }
       on("uosmHigh");
@@ -2468,6 +2515,7 @@
       const primary = step34.primaryCategory?.id;
       step34.candidateCategories.forEach((cat) => {
         const short = cat.id.split("_")[0]; // cat1 … cat6
+        $(`qdd-cat-${short}`)?.classList.add(cat.id === primary ? "hit" : "maybe");
         const leaf = `${prefix}_${short}`;
         if (!$(`qn-${leaf}`)) return;
         edge(side, leaf);
@@ -3190,6 +3238,7 @@
 
   // 初始執行一次渲染
   buildQuickDdFlow();
+  buildQuickDdCats();
   recalculateAll();
   setDisplayMode("quick");
 </script>

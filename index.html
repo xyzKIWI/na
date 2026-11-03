@@ -234,6 +234,24 @@
     font-size: 0.8rem;
     font-weight: 600;
   }
+  /* 快速鑑別診斷 */
+  .qdd-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .qdd-volume { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  #qdd-result .qdd-line { margin: 4px 0; font-size: 0.88rem; line-height: 1.55; }
+  #qdd-result .qdd-big { font-weight: 800; color: var(--navy); }
+  #qdd-result .qdd-note { margin: 6px 0 0; font-size: 0.78rem; color: var(--muted); }
+  .qdd-volume .seg-item,
+  .qdd-volume .seg-item span { width: 100%; height: 100%; box-sizing: border-box; }
+  @media (max-width: 540px) {
+    .qdd-grid { grid-template-columns: 1fr 1fr; }
+    body.quick-mode .segmented.qdd-volume { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .qdd-volume .seg-item span { font-size: 0.8rem; padding: 6px 4px; }
+  }
+
   /* 急診下一步檢驗 */
   .labs-grid {
     display: grid;
@@ -1161,6 +1179,51 @@
     <div id="step1-limits-panel" class="alert-box teal"></div>
   </section>
 
+  <!-- ==================== 快速鑑別診斷（快速模式） ==================== -->
+  <section class="step-card" id="quick-dd" data-quick-only>
+    <div class="step-header">
+      <div class="step-title-group">
+        <span class="step-num">DD</span>
+        <h2>快速鑑別診斷</h2>
+      </div>
+      <span class="step-badge">與完整模式 Step 2–4 同一套判讀</span>
+    </div>
+    <div class="qdd-grid">
+      <div class="field">
+        <label for="qdd-sosm">血清滲透壓 <small>Serum Osm</small></label>
+        <div class="input-wrap">
+          <input id="qdd-sosm" type="number" min="150" max="450" step="1" inputmode="decimal" placeholder="如 245" autocomplete="off">
+          <span class="unit">mOsm/kg</span>
+        </div>
+      </div>
+      <div class="field">
+        <label for="qdd-uosm">尿液滲透壓 <small>Urine Osm</small></label>
+        <div class="input-wrap">
+          <input id="qdd-uosm" type="number" min="20" max="1500" step="1" inputmode="decimal" placeholder="如 420" autocomplete="off">
+          <span class="unit">mOsm/kg</span>
+        </div>
+      </div>
+      <div class="field">
+        <label for="qdd-una">尿鈉 <small>Urine Na</small></label>
+        <div class="input-wrap">
+          <input id="qdd-una" type="number" min="1" max="300" step="1" inputmode="decimal" placeholder="如 55" autocomplete="off">
+          <span class="unit">mEq/L</span>
+        </div>
+      </div>
+    </div>
+    <div class="field">
+      <span class="field-label">體液狀態</span>
+      <div class="segmented qdd-volume" role="radiogroup" aria-label="快速鑑別診斷體液狀態">
+        <label class="seg-item"><input type="radio" name="qdd-volume" value="hypovolemic"><span>低血容</span></label>
+        <label class="seg-item"><input type="radio" name="qdd-volume" value="euvolemic"><span>正常</span></label>
+        <label class="seg-item"><input type="radio" name="qdd-volume" value="hypervolemic"><span>高血容／水腫</span></label>
+        <label class="seg-item"><input type="radio" name="qdd-volume" value="equivocal" checked><span>不確定</span></label>
+      </div>
+    </div>
+    <label class="check-pill" style="max-width: 320px;"><input type="checkbox" id="qdd-diuretics"><span>💊 近期使用利尿劑</span></label>
+    <div id="qdd-result" class="alert-box teal" style="margin-top: 10px;"></div>
+  </section>
+
   <!-- ==================== 急診下一步檢驗 ==================== -->
   <section class="step-card" id="labs">
     <div class="step-header">
@@ -1213,7 +1276,7 @@
       <div class="field">
         <label for="measured-osm">實測血清滲透壓 <small>Measured Serum Osm</small></label>
         <div class="input-wrap">
-          <input id="measured-osm" type="number" min="150" max="450" step="1" inputmode="decimal" placeholder="如 245" autocomplete="off">
+          <input id="measured-osm" data-quick-mirrored type="number" min="150" max="450" step="1" inputmode="decimal" placeholder="如 245" autocomplete="off">
           <span class="unit">mOsm/kg</span>
         </div>
         <span class="hint">&lt; 280 低張｜280–285 等張｜&gt; 285 需排除高 BUN/乙醇</span>
@@ -1273,7 +1336,7 @@
       <div class="field">
         <label for="urine-osm">尿液滲透壓 (Urine Osm) <small>ADH 活性指標</small></label>
         <div class="input-wrap">
-          <input id="urine-osm" type="number" min="20" max="1500" step="1" inputmode="decimal" placeholder="如 420" autocomplete="off">
+          <input id="urine-osm" data-quick-mirrored type="number" min="20" max="1500" step="1" inputmode="decimal" placeholder="如 420" autocomplete="off">
           <span class="unit">mOsm/kg</span>
         </div>
         <span class="hint">≤ 100 極度稀釋 (低 ADH)；&gt; 100 具 ADH 活性</span>
@@ -1282,7 +1345,7 @@
       <div class="field">
         <label for="urine-na">尿鈉 (Urine Na) <small>RAAS 保鈉指標</small></label>
         <div class="input-wrap">
-          <input id="urine-na" type="number" min="1" max="300" step="1" inputmode="decimal" placeholder="如 55" autocomplete="off">
+          <input id="urine-na" data-quick-mirrored type="number" min="1" max="300" step="1" inputmode="decimal" placeholder="如 55" autocomplete="off">
           <span class="unit">mEq/L</span>
         </div>
         <span class="hint">20–30 mEq/L 為臨床灰區，支援切點切換</span>
@@ -1312,19 +1375,19 @@
       <span class="field-label">臨床細胞外液狀態 (Clinical ECF Volume Status) <small>若理學檢查不確定，請選「不確定 (Equivocal)」並列比較候選診斷</small></span>
       <div class="segmented" role="radiogroup" aria-label="臨床體液狀態">
         <label class="seg-item">
-          <input type="radio" name="volume-status" value="hypovolemic">
+          <input type="radio" data-quick-mirrored name="volume-status" value="hypovolemic">
           <span>🏜️ 低血容 (Hypovolemic)<br><small>姿位性低血壓・心搏過速・黏膜乾</small></span>
         </label>
         <label class="seg-item">
-          <input type="radio" name="volume-status" value="euvolemic">
+          <input type="radio" data-quick-mirrored name="volume-status" value="euvolemic">
           <span>⚖️ 正常血容 (Euvolemic)<br><small>無水腫亦無明顯脫水徵象</small></span>
         </label>
         <label class="seg-item">
-          <input type="radio" name="volume-status" value="hypervolemic">
+          <input type="radio" data-quick-mirrored name="volume-status" value="hypervolemic">
           <span>🌊 高血容 (Hypervolemic)<br><small>雙下肢水腫・腹水・頸靜脈怒張・肺囉音</small></span>
         </label>
         <label class="seg-item">
-          <input type="radio" name="volume-status" value="equivocal" checked>
+          <input type="radio" data-quick-mirrored name="volume-status" value="equivocal" checked>
           <span>❓ 體液不確定 (Equivocal)<br><small>臨床常見！並列比較低血容 vs SIADH</small></span>
         </label>
       </div>
@@ -1334,7 +1397,7 @@
     <div class="field" style="margin-top: 8px;">
       <span class="field-label">尿液指標干擾因子檢核（勾選後自動提示校正指標如 FE_Urea、FE_UA、Urine Cl）</span>
       <div class="check-grid">
-        <label class="check-pill"><input type="checkbox" id="conf-diuretics"><span>💊 近期使用利尿劑 (Thiazides / Loop)</span></label>
+        <label class="check-pill"><input type="checkbox" id="conf-diuretics" data-quick-mirrored><span>💊 近期使用利尿劑 (Thiazides / Loop)</span></label>
         <label class="check-pill"><input type="checkbox" id="conf-vomiting"><span>🤮 頻繁嘔吐／鼻胃管引流 (鹼中毒排 HCO₃⁻)</span></label>
         <label class="check-pill"><input type="checkbox" id="conf-saline"><span>💧 採檢前已輸注 0.9% NaCl／含鈉點滴</span></label>
         <label class="check-pill"><input type="checkbox" id="conf-nonconcurrent"><span>⏱️ 血液與尿液非同期採檢</span></label>
@@ -1876,7 +1939,8 @@
       document.querySelectorAll("[data-advanced]").forEach((container) => {
         const name = container.dataset.advanced;
         if (!name) return;
-        const changed = [...container.querySelectorAll("input, select")].some((el) => {
+        // 快速鑑別診斷卡片已顯示的欄位不算「隱藏」
+        const changed = [...container.querySelectorAll("input, select")].filter((el) => !("quickMirrored" in el.dataset)).some((el) => {
           if (el.tagName === "SELECT") {
             const def = [...el.options].find((o) => o.defaultSelected) || el.options[0];
             return el.value !== def.value;
@@ -2035,6 +2099,7 @@
       },
     });
     renderStep34(step1, step2, step34);
+    renderQuickDd(step2, step34);
 
     // 6. Step 5B 點滴速率計算機
     const infusionPlan = calculateInfusionPlan({
@@ -2265,6 +2330,55 @@
       <p style="margin:4px 0 8px; font-size:0.88rem;">${step2.clinicalSummary}</p>
       <div style="font-size:0.86rem; font-weight:700; color:var(--navy);">▶ 下一步臨床建議：${step2.nextAction}</div>
     `;
+  }
+
+  // 快速鑑別診斷結果：只顯示既有 Step 2–4 判讀文字的精簡版
+  function renderQuickDd(step2, step34) {
+    // 完整模式或範例改了欄位時，同步回快速卡片（不覆蓋正在輸入的欄位）
+    syncQuickDdFromFull();
+
+    const box = $("qdd-result");
+    const lines = [];
+    if (step2.isValid && step2.measuredOsm !== null) {
+      lines.push(`<p class="qdd-line"><b>① 滲透壓</b>：${step2.branchTitle}</p>`);
+    } else if (step2.isValid) {
+      lines.push(`<p class="qdd-line"><b>① 滲透壓</b>：未填 Serum Osm，下方分類假設為低張性低血鈉</p>`);
+    }
+
+    if (step2.isValid && !step2.proceedToStep3) {
+      lines.push(`<p class="qdd-line">${step2.nextAction}</p>`);
+    } else if (step34.classificationMode === "pending_uosm") {
+      lines.push(`<p class="qdd-line"><b>② 分類</b>：請輸入 Urine Osm</p>`);
+    } else if (step34.classificationMode === "pending_una") {
+      lines.push(`<p class="qdd-line"><b>② 分類</b>：U_Osm &gt; 100，請輸入 Urine Na</p>`);
+    } else if (step34.primaryCategory) {
+      const cat = step34.primaryCategory;
+      lines.push(`<p class="qdd-line"><b>② 最可能</b>：<span class="qdd-big">${cat.code}｜${cat.name}</span></p>`);
+      lines.push(`<p class="qdd-line"><b>常見病因</b>：${cat.typicalDiagnoses.slice(0, 3).join("；")}</p>`);
+      const others = step34.candidateCategories.filter((c) => c.id !== cat.id);
+      if (others.length > 0) {
+        lines.push(`<p class="qdd-line"><b>也要考慮</b>：${others.map((c) => `${c.code} ${c.name}`).join("；")}</p>`);
+      }
+      if (step34.desalinationMessage) {
+        lines.push(`<p class="qdd-line" style="color:var(--red); font-weight:700;">${step34.desalinationMessage}</p>`);
+      }
+    }
+
+    if (lines.length === 0) {
+      lines.push(`<p class="qdd-line">先在 Step 1 輸入血鈉，再填上方欄位。</p>`);
+    }
+    lines.push(`<p class="qdd-note">完整判讀、處置與陷阱請切換「🔬 完整模式」看 Step 2–4。</p>`);
+    box.innerHTML = lines.join("");
+  }
+
+  function syncQuickDdFromFull() {
+    const active = document.activeElement;
+    [["qdd-sosm", "measured-osm"], ["qdd-uosm", "urine-osm"], ["qdd-una", "urine-na"]].forEach(([quickId, fullId]) => {
+      if ($(quickId) !== active) $(quickId).value = $(fullId).value;
+    });
+    const vol = document.querySelector('input[name="volume-status"]:checked')?.value || "equivocal";
+    document.querySelector(`input[name="qdd-volume"][value="${vol}"]`).checked = true;
+    $("qdd-diuretics").checked = $("conf-diuretics").checked;
   }
 
   function renderStep34(step1, step2, step34) {
@@ -2868,6 +2982,26 @@
     } catch {
       copyBtn.textContent = "⚠️ 瀏覽器阻擋自動複製，請手動複製";
     }
+  });
+
+  // 快速鑑別診斷：輸入寫回完整模式欄位（同一套 Step 2–4 計算），在全域重算前執行
+  const QDD_MIRRORS = [
+    ["qdd-sosm", "measured-osm"],
+    ["qdd-uosm", "urine-osm"],
+    ["qdd-una", "urine-na"],
+  ];
+  QDD_MIRRORS.forEach(([quickId, fullId]) => {
+    $(quickId).addEventListener("input", () => {
+      $(fullId).value = $(quickId).value;
+    });
+  });
+  document.querySelectorAll('input[name="qdd-volume"]').forEach((radio) => {
+    radio.addEventListener("change", () => {
+      document.querySelector(`input[name="volume-status"][value="${radio.value}"]`).checked = true;
+    });
+  });
+  $("qdd-diuretics").addEventListener("change", () => {
+    $("conf-diuretics").checked = $("qdd-diuretics").checked;
   });
 
   // 綁定所有輸入與選擇器事件

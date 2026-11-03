@@ -252,6 +252,21 @@
     .qdd-volume .seg-item span { font-size: 0.8rem; padding: 6px 4px; }
   }
 
+  /* 鑑別診斷流程圖 */
+  .qdd-flow { margin-top: 10px; }
+  .qdd-flow svg { width: 100%; max-width: 520px; height: auto; display: block; margin: 0 auto; }
+  .qdd-flow .fn rect { fill: #fff; stroke: #cbd5e1; stroke-width: 1.2; }
+  .qdd-flow .fn text { font-size: 11px; fill: #64748b; font-weight: 600; text-anchor: middle; }
+  .qdd-flow .fn.on rect { fill: #e0f2fe; stroke: var(--teal); stroke-width: 2; }
+  .qdd-flow .fn.on text { fill: var(--navy); font-weight: 800; }
+  .qdd-flow .fn.hit rect { fill: var(--navy); stroke: var(--navy); }
+  .qdd-flow .fn.hit text { fill: #fff; font-weight: 800; }
+  .qdd-flow .fn.maybe rect { stroke: var(--teal); stroke-dasharray: 4 3; stroke-width: 1.6; }
+  .qdd-flow .fe { fill: none; stroke: #cbd5e1; stroke-width: 1.2; marker-end: url(#qdd-arrow-off); }
+  .qdd-flow .fe.on { stroke: var(--teal); stroke-width: 2.6; marker-end: url(#qdd-arrow-on); }
+  .qdd-flow .fe.assumed { stroke: var(--amber); stroke-width: 2.2; stroke-dasharray: 5 4; marker-end: url(#qdd-arrow-assumed); }
+  .qdd-flow .legend { font-size: 10px; fill: #64748b; }
+
   /* 急診下一步檢驗 */
   .labs-grid {
     display: grid;
@@ -1221,6 +1236,7 @@
       </div>
     </div>
     <label class="check-pill" style="max-width: 320px;"><input type="checkbox" id="qdd-diuretics"><span>💊 近期使用利尿劑</span></label>
+    <div class="qdd-flow" id="qdd-flow" role="img" aria-label="低血鈉鑑別診斷流程圖，依輸入數值高亮目前路徑"></div>
     <div id="qdd-result" class="alert-box teal" style="margin-top: 10px;"></div>
   </section>
 
@@ -2100,6 +2116,7 @@
     });
     renderStep34(step1, step2, step34);
     renderQuickDd(step2, step34);
+    renderQuickDdFlow(step2, step34);
 
     // 6. Step 5B 點滴速率計算機
     const infusionPlan = calculateInfusionPlan({
@@ -2330,6 +2347,141 @@
       <p style="margin:4px 0 8px; font-size:0.88rem;">${step2.clinicalSummary}</p>
       <div style="font-size:0.86rem; font-weight:700; color:var(--navy);">▶ 下一步臨床建議：${step2.nextAction}</div>
     `;
+  }
+
+  // 鑑別診斷流程圖：節點與連線（切點與 na.js 判讀一致：滲透壓 280／285、U_Osm 100、U_Na 依切點設定）
+  const QDD_NODES = [
+    { id: "na", cx: 180, y: 6, w: 120, lines: ["血鈉 < 135"] },
+    { id: "sosm", cx: 180, y: 56, w: 130, lines: ["血清滲透壓"] },
+    { id: "iso", cx: 62, y: 110, w: 112, h: 38, lines: ["280–285 等張", "偽性低血鈉？"] },
+    { id: "hypo", cx: 180, y: 110, w: 100, h: 38, lines: ["< 280", "真性低張"] },
+    { id: "hyper", cx: 298, y: 110, w: 112, h: 38, lines: ["> 285 高張", "高血糖／外源溶質"] },
+    { id: "uosm", cx: 180, y: 176, w: 130, lines: ["尿液滲透壓"] },
+    { id: "uosmLow", cx: 75, y: 228, w: 100, lines: ["≤ 100"] },
+    { id: "uosmHigh", cx: 245, y: 228, w: 100, lines: ["> 100"] },
+    { id: "cat4", cx: 75, y: 280, w: 128, h: 38, lines: ["Cat 4", "多飲／低溶質攝取"] },
+    { id: "una", cx: 245, y: 280, w: 110, lines: ["尿鈉"] },
+    { id: "unaLow", cx: 180, y: 334, w: 96, lines: ["≤ 30"] },
+    { id: "unaHigh", cx: 306, y: 334, w: 96, lines: ["> 30"] },
+    { id: "low_cat1", cx: 196, y: 386, w: 100, lines: ["低血容 Cat 1"] },
+    { id: "low_cat5", cx: 196, y: 424, w: 100, lines: ["高血容 Cat 5"] },
+    { id: "low_cat3", cx: 196, y: 462, w: 100, lines: ["正常 Cat 3"] },
+    { id: "high_cat2", cx: 314, y: 386, w: 88, lines: ["低血容 Cat 2"] },
+    { id: "high_cat3", cx: 314, y: 424, w: 88, lines: ["正常 Cat 3"] },
+    { id: "high_cat6", cx: 314, y: 462, w: 88, lines: ["高血容 Cat 6"] },
+  ];
+  const QDD_EDGES = [
+    ["na", "sosm"], ["sosm", "iso"], ["sosm", "hypo"], ["sosm", "hyper"], ["hypo", "uosm"],
+    ["uosm", "uosmLow"], ["uosm", "uosmHigh"], ["uosmLow", "cat4"], ["uosmHigh", "una"],
+    ["una", "unaLow"], ["una", "unaHigh"],
+    ["unaLow", "low_cat1", "rail"], ["unaLow", "low_cat5", "rail"], ["unaLow", "low_cat3", "rail"],
+    ["unaHigh", "high_cat2", "rail"], ["unaHigh", "high_cat3", "rail"], ["unaHigh", "high_cat6", "rail"],
+  ];
+
+  function buildQuickDdFlow() {
+    const node = Object.fromEntries(QDD_NODES.map((n) => [n.id, { h: 28, ...n }]));
+    const edges = QDD_EDGES.map(([from, to, kind]) => {
+      const a = node[from];
+      const b = node[to];
+      let d;
+      if (kind === "rail") {
+        // 葉節點直排：沿左側垂直線往下再轉入
+        const railX = b.cx - b.w / 2 - 8;
+        d = `M${railX},${a.y + a.h} V${b.y + b.h / 2} H${b.cx - b.w / 2 - 1}`;
+      } else {
+        const midY = (a.y + a.h + b.y) / 2;
+        d = `M${a.cx},${a.y + a.h} V${midY} H${b.cx} V${b.y - 1}`;
+      }
+      return `<path class="fe" id="qe-${from}-${to}" d="${d}"/>`;
+    });
+    const nodes = Object.values(node).map((n) => {
+      const top = n.y + n.h / 2 - (n.lines.length - 1) * 6.5 + 4;
+      const text = n.lines.map((t, i) => `<tspan x="${n.cx}" y="${top + i * 13}">${t}</tspan>`).join("");
+      return `<g class="fn" id="qn-${n.id}"><rect x="${n.cx - n.w / 2}" y="${n.y}" width="${n.w}" height="${n.h}" rx="7"/><text>${text}</text></g>`;
+    });
+    const marker = (id, color) =>
+      `<marker id="${id}" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="${color}"/></marker>`;
+    $("qdd-flow").innerHTML = `<svg viewBox="0 0 360 530" xmlns="http://www.w3.org/2000/svg">
+      <defs>${marker("qdd-arrow-off", "#cbd5e1")}${marker("qdd-arrow-on", "var(--teal)")}${marker("qdd-arrow-assumed", "var(--amber)")}</defs>
+      ${edges.join("")}${nodes.join("")}
+      <text class="legend" x="8" y="506">深藍＝最可能分類　虛線框＝也要考慮</text>
+      <text class="legend" x="8" y="521">橘色虛線＝未填 Serum Osm，暫時假設低張</text>
+    </svg>`;
+  }
+
+  function renderQuickDdFlow(step2, step34) {
+    const flow = $("qdd-flow");
+    flow.querySelectorAll(".fn").forEach((el) => el.classList.remove("on", "hit", "maybe"));
+    flow.querySelectorAll(".fe").forEach((el) => el.classList.remove("on", "assumed"));
+    const on = (id) => $(`qn-${id}`)?.classList.add("on");
+    const edge = (from, to, cls = "on") => $(`qe-${from}-${to}`)?.classList.add(cls);
+
+    // 尿鈉切點跟著設定（30 或 20）
+    const cutoff = step34.uNaCutoff;
+    flow.querySelector("#qn-unaLow tspan").textContent = `≤ ${cutoff}`;
+    flow.querySelector("#qn-unaHigh tspan").textContent = `> ${cutoff}`;
+
+    try {
+      if (!step2.isValid || step2.branchId === "not_hyponatremia") return;
+      on("na");
+      edge("na", "sosm");
+      on("sosm");
+
+      const b = step2.branchId;
+      if (b === "true_hypotonic" || b === "hypotonic_with_ineffective_osmoles") {
+        on("hypo");
+        edge("sosm", "hypo");
+      } else if (b === "isotonic_pseudohyponatremia" || b === "isotonic_high_gap") {
+        on("iso");
+        edge("sosm", "iso");
+      } else if (b === "hypertonic" || b === "hypertonic_or_unmeasured_osmoles" || b === "hypertonic_hyperglycemia_suspected") {
+        on("hyper");
+        edge("sosm", "hyper");
+      } else if (b === "pending_measured_osm" && step2.proceedToStep3) {
+        edge("sosm", "hypo", "assumed");
+      }
+      if (!step2.proceedToStep3 || !step34.hasUrineOsm) return;
+
+      on("uosm");
+      if (b === "true_hypotonic" || b === "hypotonic_with_ineffective_osmoles") edge("hypo", "uosm");
+      else if (b === "pending_measured_osm") edge("hypo", "uosm", "assumed");
+
+      if (step34.classificationMode === "confirmed_dilute") {
+        on("uosmLow");
+        edge("uosm", "uosmLow");
+        edge("uosmLow", "cat4");
+        $("qn-cat4").classList.add("hit");
+        return;
+      }
+      on("uosmHigh");
+      edge("uosm", "uosmHigh");
+      if (!step34.hasUrineNa) return;
+      on("una");
+      edge("uosmHigh", "una");
+
+      const low = step34.activeFlowNodes.includes("node_una_low");
+      const side = low ? "unaLow" : "unaHigh";
+      const prefix = low ? "low" : "high";
+      on(side);
+      edge("una", side);
+
+      const primary = step34.primaryCategory?.id;
+      step34.candidateCategories.forEach((cat) => {
+        const short = cat.id.split("_")[0]; // cat1 … cat6
+        const leaf = `${prefix}_${short}`;
+        if (!$(`qn-${leaf}`)) return;
+        edge(side, leaf);
+        $(`qn-${leaf}`).classList.add(cat.id === primary ? "hit" : "maybe");
+      });
+    } finally {
+      raiseLitEdges(flow);
+    }
+  }
+
+  // 亮起的連線移到灰色連線之上，避免箭頭被蓋住
+  function raiseLitEdges(flow) {
+    const firstNode = flow.querySelector(".fn");
+    flow.querySelectorAll(".fe.on, .fe.assumed").forEach((el) => firstNode.before(el));
   }
 
   // 快速鑑別診斷結果：只顯示既有 Step 2–4 判讀文字的精簡版
@@ -3037,6 +3189,7 @@
   });
 
   // 初始執行一次渲染
+  buildQuickDdFlow();
   recalculateAll();
   setDisplayMode("quick");
 </script>

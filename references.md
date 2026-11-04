@@ -19,7 +19,7 @@
    - Verbalis JG, Goldsmith SR, Greenberg A, et al. *Diagnosis, evaluation, and treatment of hyponatremia: expert panel recommendations.* **Am J Med.** 2013;126(10 Suppl 1):S1–S42. [PubMed](https://pubmed.ncbi.nlm.nih.gov/24074529/)
    - **重點**：
      - 急性嚴重症狀：給予 **3% NaCl 100 mL IV bolus over 10 min**，若症狀持續可每 10 分鐘重複，最多共 3 次（總量 300 mL），目標快速上升 4–6 mEq/L 緩解腦水腫。
-     - 區分一般慢性低血鈉（目標 6–8 mEq/L/24h，首 24h 上限 10–12、48h 上限 18 mEq/L）與**高 ODS 風險群**（$\text{Na} \le 105\text{ mEq/L}$、低血鉀、酗酒、營養不良、晚期肝病：24h 目標 **4–6 mEq/L**，任何 24h 絕對上限 **8 mEq/L**）。
+     - 區分一般慢性低血鈉（最低矯正 4–8 mEq/L/24h，首 24h 上限 10–12、48h 上限 18 mEq/L）與**高 ODS 風險群**（$\text{Na} \le 105\text{ mEq/L}$、低血鉀、酗酒、營養不良、晚期肝病：24h 目標 **4–6 mEq/L**，任何 24h 絕對上限 **8 mEq/L**）。
 
 3. **AAFP 急診與住院臨床實務綜論 (AAFP 2015)**
    - Braun MM, Barstow CH, Pyzocha NJ. *Diagnosis and management of sodium disorders: hyponatremia and hypernatremia.* **Am Fam Physician.** 2015;91(5):299–307. [PDF](https://www.aafp.org/afp/2015/0301/p299.pdf)

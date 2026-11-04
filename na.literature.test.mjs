@@ -257,7 +257,7 @@ test("Bolus 方案數值與 [ESE2014] §7.1.1／§7.2.1.4 一致：150 mL 3% ove
   assert.equal(ese.moderate.infusionMinutes, 20);
 });
 
-test("[SALSA-P] 中度症狀 2 mL/kg over 20 min；Step 1 以 Math.round(體重×2) 計算體積並套用有限體積公式", () => {
+test("[SALSA-P] 中度症狀 2 mL/kg over 20 min；Step 1 以 Math.round(體重×mL/kg) 計算體積並套用有限體積公式", () => {
   // SALSA-P："moderately severe symptoms … 2 mL/kg 3% hypertonic saline over 20 min"
   assert.equal(BOLUS_REGIMENS.salsa_2021.moderate.weightBasedMlPerKg, 2);
   const r = evaluateStep1Triage({ serumNa: 115, symptomSeverity: "moderate", regimenKey: "salsa_2021", weightKg: 62.3, tbwL: 31.15 });
@@ -288,18 +288,16 @@ test("美國高 ODS 風險：目標 4–6、上限 8 mmol/L/24h（[HOORN17] Tabl
 
 test(
   "[HOORN17] Table 2：美國一般風險最低矯正 4 mmol/L per d",
-  { todo: "工具一般風險目標下限為 6（6–8），文獻為 4–8（見 TEST_REPORT.md 不一致 #5）" },
   () => {
     assert.equal(evaluateStep1Triage({ serumNa: 120, limitGuideline: "us_cjasn" }).limits.targetMin24h, 4);
   },
 );
 
-// [SALSA-P] 與工具不一致的四點各自獨立成 todo，一點修好不會被其他點擋住（見 TEST_REPORT.md 不一致 #4）。
+// [SALSA-P] 四點原為 todo（TEST_REPORT.md 不一致 #4），已依計畫書修正。
 // SALSA-P："severe symptoms … 4 mL/kg 3% hypertonic saline over 40 min (200 mL … for unknown body weight)"；
 // "moderately severe symptoms … 2 mL/kg … over 20 min (100 mL … for unknown body weight)"
 test(
   "[SALSA-P] 嚴重症狀 4 mL/kg",
-  { todo: "工具 SALSA 嚴重症狀為 2 mL/kg（見 TEST_REPORT.md 不一致 #4）" },
   () => {
     assert.equal(BOLUS_REGIMENS.salsa_2021.severe.weightBasedMlPerKg, 4);
   },
@@ -307,7 +305,6 @@ test(
 
 test(
   "[SALSA-P] 嚴重症狀 over 40 min",
-  { todo: "工具 SALSA 嚴重症狀為 over 20 min（見 TEST_REPORT.md 不一致 #4）" },
   () => {
     assert.equal(BOLUS_REGIMENS.salsa_2021.severe.infusionMinutes, 40);
   },
@@ -315,7 +312,6 @@ test(
 
 test(
   "[SALSA-P] 未知體重時嚴重症狀 200 mL",
-  { todo: "工具未填體重時退回 150 mL（見 TEST_REPORT.md 不一致 #4）" },
   () => {
     const noWeight = evaluateStep1Triage({ serumNa: 115, symptomSeverity: "severe", regimenKey: "salsa_2021", tbwL: 30 });
     assert.equal(noWeight.activeRegimenBolus.bolusMl, 200);
@@ -324,7 +320,6 @@ test(
 
 test(
   "[SALSA-P] 未知體重時中度症狀 100 mL",
-  { todo: "工具未填體重時退回 150 mL（見 TEST_REPORT.md 不一致 #4）" },
   () => {
     const noWeight = evaluateStep1Triage({ serumNa: 115, symptomSeverity: "moderate", regimenKey: "salsa_2021", tbwL: 30 });
     assert.equal(noWeight.activeRegimenBolus.bolusMl, 100);
@@ -465,12 +460,15 @@ test("計算滲透壓 2Na + Glc/18 + BUN/2.8（+ EtOH/4.6），有效滲透壓�
   close(r.ethanolOsmTerm37, 92 / 3.7, 1e-9);
 });
 
-test("Step 2 實測滲透壓分界：< 280 低張、280–285 等張、> 285 高張（工具現行切點）", () => {
+test("Step 2 實測滲透壓分界：< 280 低張、280–295 等張、> 295 高張（[FIG3]；[ESE2014] Table 10 偽性低血鈉屬等張）", () => {
   const base = { serumNa: 128, glucoseMgDl: 90, bunMgDl: 14 };
   assert.equal(step2({ ...base, measuredOsm: 279.9 }).branchId, "true_hypotonic");
   assert.equal(step2({ ...base, measuredOsm: 280 }).branchId, "isotonic_pseudohyponatremia");
-  assert.equal(step2({ ...base, measuredOsm: 285 }).branchId, "isotonic_pseudohyponatremia");
-  assert.equal(step2({ ...base, measuredOsm: 285.1 }).branchId, "hypertonic_or_unmeasured_osmoles");
+  assert.equal(step2({ ...base, measuredOsm: 290 }).branchId, "isotonic_pseudohyponatremia");
+  assert.equal(step2({ ...base, measuredOsm: 295 }).branchId, "isotonic_pseudohyponatremia");
+  assert.equal(step2({ ...base, measuredOsm: 295.1 }).branchId, "hypertonic_or_unmeasured_osmoles");
+  // 有效張力 > 285（高血糖）仍優先判為高張，不受實測滲透壓等張上限影響
+  assert.equal(step2({ serumNa: 128, measuredOsm: 292, glucoseMgDl: 600, bunMgDl: 14 }).branchId, "hypertonic");
 });
 
 test("[ESE2014] §6.2.1.2：實測滲透壓 < 275 一定是低張性低血鈉", () => {
@@ -483,14 +481,13 @@ test("[ESE2014] §6.2.1.2：實測滲透壓 < 275 一定是低張性低血鈉", 
 
 test(
   "[FIG3] 實測滲透壓 280–290 屬偽性低血鈉區間：Na 122 (Indirect ISE)、Osm 288 應歸偽性低血鈉",
-  { todo: "工具以 285 為等張上限，288 被歸為 hypertonic_or_unmeasured_osmoles 並導向 Step 3（見 TEST_REPORT.md 不一致 #1）" },
   () => {
     const r = step2({ serumNa: 122, measuredOsm: 288, glucoseMgDl: 90, bunMgDl: 14, iseMethod: "indirect" });
     assert.equal(r.branchId, "isotonic_pseudohyponatremia");
   },
 );
 
-test("偽性低血鈉：Indirect ISE 下 Osm 280–285 歸為偽性低血鈉、不進 Step 3；Direct ISE 則視為外源溶質", () => {
+test("偽性低血鈉：Indirect ISE 下 Osm 280–295 歸為偽性低血鈉、不進 Step 3；Direct ISE 則視為外源溶質", () => {
   const indirect = step2({ serumNa: 120, measuredOsm: 284, glucoseMgDl: 100, bunMgDl: 10, iseMethod: "indirect" });
   assert.equal(indirect.branchId, "isotonic_pseudohyponatremia");
   assert.equal(indirect.proceedToStep3, false);
@@ -583,10 +580,12 @@ test("Step 4 六大分類每個分支（含 equivocal 並列候選）", () => {
 
 test(
   "[ESE2014] §6.3.1.4：U_Na ≤ 30 應先接受『低有效動脈血容積』，即使臨床判斷為正常血容",
-  { todo: "工具在 euvolemic + U_Na ≤ 30 時主分類為 Cat 3 (SIADH)，Cat 1 僅列為候選（見 TEST_REPORT.md 不一致 #2）" },
   () => {
     const r = step34({ urineOsm: 400, urineNa: 15, volumeStatus: "euvolemic" });
-    assert.ok(["cat1_hypovol_low_una", "cat5_hypervol_low_una"].includes(r.primaryCategory.id));
+    assert.equal(r.primaryCategory.id, "cat1_hypovol_low_una");
+    // SIADH (Cat 3) 仍列為候選，並保留「亞臨床低血容 vs 低鹽 SIADH」提示
+    assert.deepEqual(r.candidateCategories.map((c) => c.id), ["cat1_hypovol_low_una", "cat3_euvol_adh"]);
+    assert.ok(r.confounderWarnings.some((w) => /亞臨床低血容/.test(w)));
   },
 );
 
@@ -714,4 +713,11 @@ test("parseOptionalNumber：逗號、單位文字等非數字輸入回傳 NaN，
   assert.equal(parseOptionalNumber("-6"), -6);
   assert.ok(Number.isNaN(parseOptionalNumber({})));
   assert.ok(Number.isNaN(parseOptionalNumber(true)));
+});
+
+test("[SALSA-P] 嚴重症狀以 4 mL/kg 計算體積（62.3 kg → 249 mL），並套用有限體積公式", () => {
+  const r = evaluateStep1Triage({ serumNa: 115, symptomSeverity: "severe", regimenKey: "salsa_2021", weightKg: 62.3, tbwL: 31.15 });
+  assert.equal(r.activeRegimenBolus.bolusMl, 249);
+  assert.equal(r.salsaBolusMlPerKg, 4);
+  close(r.activeRegimenBolus.deltaNaFinite, (0.249 * (513.3 - 115)) / (31.15 + 0.249), 1e-9);
 });

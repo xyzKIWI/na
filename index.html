@@ -1144,7 +1144,7 @@
       <div class="field" data-advanced="上限指引">
         <label for="limit-guideline">慢性安全上限基準</label>
         <select id="limit-guideline">
-          <option value="us_cjasn" selected>US 2013 / CJASN 2024 (一般目標 6–8/上限 10；高風險目標 4–6/上限 8)</option>
+          <option value="us_cjasn" selected>US 2013 / CJASN 2024 (一般目標 4–8/上限 10；高風險目標 4–6/上限 8)</option>
           <option value="ese_2014">ESE 2014 歐洲指引 (首 24h 上限 10 mmol/L、其後每 24h 上限 8)</option>
         </select>
       </div>
@@ -1315,7 +1315,7 @@
           <input id="measured-osm" data-quick-mirrored type="number" min="150" max="450" step="1" inputmode="decimal" placeholder="如 245" autocomplete="off">
           <span class="unit">mOsm/kg</span>
         </div>
-        <span class="hint">&lt; 280 低張｜280–285 等張｜&gt; 285 需排除高 BUN/乙醇</span>
+        <span class="hint">&lt; 280 低張｜280–295 等張｜&gt; 295 需排除高 BUN/乙醇</span>
       </div>
 
       <div class="field">
@@ -2195,13 +2195,9 @@
       const p = step1.activeStepProtocol;
       let bolusMathHtml = "";
       if (step1.bolus100 && step1.bolus150) {
-        // 與 na.js activeRegimenBolus 相同：US → 100 mL；SALSA 有體重 → 2 mL/kg，否則 150 mL；ESE → 150 mL
+        // 與 na.js activeRegimenBolus 相同：US → 100 mL；SALSA → salsaBolus（嚴重 4、中度 2 mL/kg）；ESE → 150 mL
         const activeBolusKey =
-          step1.regimen.id === "us_2013"
-            ? "100"
-            : step1.regimen.id === "salsa_2021" && step1.bolus2MlKg
-              ? "2mlkg"
-              : "150";
+          step1.regimen.id === "us_2013" ? "100" : step1.regimen.id === "salsa_2021" ? "salsa" : "150";
         const activeClass = (key) => (key === activeBolusKey ? " is-active-regimen" : "");
         bolusMathHtml = `
           <div class="kpi-row" style="margin:10px 0;">
@@ -2216,11 +2212,11 @@
               <div class="kpi-sub">2 次共 300 mL (有限體積)：+${(step1.bolus300 ? step1.bolus300.deltaNaFinite : step1.bolus150.deltaNaFinite * 2).toFixed(2)} mEq/L</div>
             </div>
             ${
-              step1.bolus2MlKg
-                ? `<div class="kpi-card${activeClass("2mlkg")}" data-bolus="2mlkg">
-                    <div class="kpi-label">2 mL/kg = ${step1.bolus2MlKg.bolusMl} mL (SALSA)</div>
-                    <div class="kpi-val">+${step1.bolus2MlKg.deltaNaFinite.toFixed(2)} mEq/L</div>
-                    <div class="kpi-sub">依體重計算單次預期升幅</div>
+              step1.salsaBolus
+                ? `<div class="kpi-card${activeClass("salsa")}" data-bolus="salsa">
+                    <div class="kpi-label">${step1.salsaBolusMlPerKg ? `${step1.salsaBolusMlPerKg} mL/kg = ` : "未知體重 "}${step1.salsaBolus.bolusMl} mL (SALSA)</div>
+                    <div class="kpi-val">+${step1.salsaBolus.deltaNaFinite.toFixed(2)} mEq/L</div>
+                    <div class="kpi-sub">依症狀分級與體重計算單次預期升幅</div>
                   </div>`
                 : ""
             }
@@ -2369,13 +2365,13 @@
     `;
   }
 
-  // 鑑別診斷流程圖：節點與連線（切點與 na.js 判讀一致：滲透壓 280／285、U_Osm 100、U_Na 依切點設定）
+  // 鑑別診斷流程圖：節點與連線（切點與 na.js 判讀一致：滲透壓 280／295、U_Osm 100、U_Na 依切點設定）
   const QDD_NODES = [
     { id: "na", cx: 180, y: 6, w: 120, lines: ["血鈉 < 135"] },
     { id: "sosm", cx: 180, y: 56, w: 130, lines: ["血清滲透壓"] },
-    { id: "iso", cx: 62, y: 110, w: 112, h: 38, lines: ["280–285 等張", "偽性低血鈉？"] },
+    { id: "iso", cx: 62, y: 110, w: 112, h: 38, lines: ["280–295 等張", "偽性低血鈉？"] },
     { id: "hypo", cx: 180, y: 110, w: 100, h: 38, lines: ["< 280", "真性低張"] },
-    { id: "hyper", cx: 298, y: 110, w: 112, h: 38, lines: ["> 285 高張", "高血糖／外源溶質"] },
+    { id: "hyper", cx: 298, y: 110, w: 112, h: 38, lines: ["> 295 高張", "高血糖／外源溶質"] },
     { id: "uosm", cx: 180, y: 176, w: 130, lines: ["尿液滲透壓"] },
     { id: "uosmLow", cx: 75, y: 228, w: 100, lines: ["≤ 100"] },
     { id: "uosmHigh", cx: 245, y: 228, w: 100, lines: ["> 100"] },
